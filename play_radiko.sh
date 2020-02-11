@@ -1,5 +1,5 @@
 #!/bin/bash
-# https://www.erestage.com/develop/raspberry-pi-radiko-2019/
+# /
 #LANG=ja_JP.utf8
 
 pid=$$
@@ -140,7 +140,7 @@ rtmpdump -v \
 	--playpath ${url_parts[2]} \
 	-W $playerurl \
 	-C S:"" -C S:"" -C S:"" -C S:$authtoken \
-	--live | mplayer -
+	--live | mplayer -channels 2 -af pan=1:1 -
 
 if [ $? = 0 ]; then
   rm -f "/tmp/${channel}_${date}"

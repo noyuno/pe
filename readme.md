@@ -30,8 +30,16 @@
 ~~~
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y libusb-dev zsh vim tmux git mpg321 rtmpdump swftools libxml2-utils
-git clone https://github.com/noyuno/room.git
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools libxml2-utils
+git clone https://github.com/noyuno/room
+~~~
+
+## エディタ等のインストール
+
+~~~
+sudo apt install -y zsh vim tmux
+git clone https://github.com/noyuno/dotfiles
+./dotfiles/bin/dfdeploy
 ~~~
 
 ## 改造（任意）
