@@ -60,13 +60,22 @@ class Led():
     GPIO.output(27, int(int(radio / 1) % 2))
 
   def human(self):
-    return int(0==GPIO.input(23))
+    return int(1==GPIO.input(23))
 
   def sw1(self):
     return int(0==GPIO.input(5))
 
   def sw2(self):
     return int(0==GPIO.input(6))
+
+  def close(self):
+      GPIO.cleanup(5)
+      GPIO.cleanup(6)
+      GPIO.cleanup(17)
+      GPIO.cleanup(18)
+      GPIO.cleanup(22)
+      GPIO.cleanup(27)
+      GPIO.cleanup(23)
 
 class Radio():
   def __init__(self, logger):
@@ -151,10 +160,12 @@ class Radio():
       stdin=self.rtmpdump.stdout, shell=False)
     
   def nextchannel(self):
-    if self.current + 1 >= len(self.channels):
-      self.current = 0
-    else:
-      self.current += 1
+    if self.mplayer != None and self.mplayer.poll() == None and \
+       self.rtmpdump != None and self.rtmpdump.poll() == None:
+      if self.current + 1 >= len(self.channels):
+        self.current = 0
+      else:
+        self.current += 1
     # if self.thread != None and self.thread.is_alive():
     #   self.thread.
     # self.thread = threading.Thread(target=self.changechannel, kwargs={
@@ -164,55 +175,75 @@ class Radio():
     self.changechannel(self.channels[self.current])
 
   def close(self):
+    self.stop()
+
+  def stop(self):
     if self.mplayer != None and self.mplayer.poll() == None:
       self.mplayer.kill()
     if self.rtmpdump != None and self.rtmpdump.poll() == None:
       self.rtmpdump.kill()
 
-def main(logger):
-  radio = Radio(logger)
-  radio.auth()
-  radio.nextchannel()
-  led = Led(logger)
+class Main():
+  def __init__(self, logger):
+    self.logger = logger
+    self.radio = Radio(self.logger)
+    self.led = Led(logger)
+    self.mode = 1
 
-  try:
-    while True:
-      # SW2 blackが押された場合
-      if led.sw2():
-        radio.nextchannel()
-        
-      # SW1 red
-      mode = led.sw1()
-      # human sensor
-      mode = led.human()
-      # if 0==GPIO.input(5):
-        # LED1, 2, 3, 4 点灯
-        # GPIO.output(17, 1)
-        # GPIO.output(18, 1)
-        # GPIO.output(22, 1)
-        # GPIO.output(27, 1)
-      #SW2押されていない場合
-      # else:
-        # LED1, 2, 3, 4 消灯
-        # GPIO.output(17, 0)
-        # GPIO.output(18, 0)
-        # GPIO.output(22, 0)
-        # GPIO.output(27, 0)
+  def start(self):
+    self.radio.nextchannel()
+    self.mode = 1
 
-      led.on(mode, radio.current)
-      time.sleep(0.01)
+  def stop(self):
+    self.radio.stop()
+    self.mode = 0
 
-  # Ctrl+Cが押されたらGPIOを解放
-  except KeyboardInterrupt:
-    GPIO.cleanup(5)
-    GPIO.cleanup(6)
-    GPIO.cleanup(17)
-    GPIO.cleanup(18)
-    GPIO.cleanup(22)
-    GPIO.cleanup(27)
-    radio.close()
+  def close(self):
+    self.led.close()
+    self.radio.close()
+
+  def run(self):
+    self.radio.auth()
+    self.radio.nextchannel()
+    stoptimer = None
+
+    try:
+      while True:
+        # SW2 blackが押された場合
+        if self.led.sw2():
+          self.radio.nextchannel()
+
+        # timer -> stop
+        if 0==self.led.human():
+          # 部屋の中に人がいない
+          if stoptimer == None or stoptimer.is_alive() == False:
+            stoptimer = threading.Timer(60, self.stop)
+            stoptimer.start()
+        else:
+          # 部屋の中に人がいる
+          if stoptimer != None and stoptimer.is_alive() == True:
+            stoptimer.cancel()
+          if self.mode == 0:
+            self.start()
+
+        # human sensor -> led
+        hmode = int(not(self.led.human()))
+        # SW1 red
+        hmode = self.led.sw1()
+
+        # send ir
+        if self.led.sw1():
+          pass
+
+        self.led.on(hmode, self.radio.current)
+        time.sleep(0.01)
+
+    # Ctrl+Cが押されたらGPIOを解放
+    except KeyboardInterrupt:
+      self.close()
 
 if __name__ == "__main__":
   logger, starttime = initlogger()
   logger.info('started room at {0}'.format(starttime))
-  main(logger)
+  main = Main(logger)
+  main.run()
