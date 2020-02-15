@@ -195,6 +195,7 @@ class Main():
     self.mode = 1
 
   def stop(self):
+    self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
     self.mode = 0
 
@@ -229,7 +230,8 @@ class Main():
         # human sensor -> led
         hmode = int(not(self.led.human()))
         # SW1 red
-        hmode = self.led.sw1()
+        if hmode == 0:
+          hmode = self.led.sw1()
 
         # send ir
         if self.led.sw1():
