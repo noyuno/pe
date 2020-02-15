@@ -3,8 +3,7 @@
 import os
 import time
 from datetime import datetime
-if not os.environ.get('DEBUG'):
-  import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import requests
 import base64
 import xml.etree.ElementTree as et
@@ -36,22 +35,20 @@ def initlogger():
 class Led():
   def __init__(self, logger):
     # GPIOの準備
-    if not os.environ.get('DEBUG'):
-      GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BCM)
 
     # SW1, SW2ピン入力設定
-    if not os.environ.get('DEBUG'):
-      GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-      GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-      # LED1, 2, 3, 4ピン出力設定
-      GPIO.setup(17, GPIO.OUT)
-      GPIO.setup(18, GPIO.OUT)
-      GPIO.setup(22, GPIO.OUT)
-      GPIO.setup(27, GPIO.OUT)
-      
-      # human sensor
-      GPIO.setup(23, GPIO.IN)
+    # LED1, 2, 3, 4ピン出力設定
+    GPIO.setup(17, GPIO.OUT)
+    GPIO.setup(18, GPIO.OUT)
+    GPIO.setup(22, GPIO.OUT)
+    GPIO.setup(27, GPIO.OUT)
+    
+    # human sensor
+    GPIO.setup(23, GPIO.IN)
 
   def on(self, mode, radio):
     GPIO.output(17, int(mode))
