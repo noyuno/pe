@@ -126,6 +126,12 @@ class Radio():
     # self.thread.start()
     self.changechannel(self.channels[self.current])
 
+  def close(self):
+    if self.mplayer != None and self.mplayer.poll() == None:
+      self.mplayer.kill()
+    if self.rtmpdump != None and self.rtmpdump.poll() == None:
+      self.rtmpdump.kill()
+
 def main(logger):
   radio = Radio(logger)
   radio.auth()
@@ -150,7 +156,7 @@ def main(logger):
     while True:
       # SW1が押された場合
       if 0==GPIO.input(5):
-        nextchannel()
+        radio.nextchannel()
 
       # SW2
       if 0==GPIO.input(6):
@@ -176,6 +182,7 @@ def main(logger):
     GPIO.cleanup(18)
     GPIO.cleanup(22)
     GPIO.cleanup(27)
+    radio.close()
 
 
 

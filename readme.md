@@ -30,7 +30,8 @@
 ~~~
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools libxml2-utils
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools libxml2-utils python3-pip
+pip3 install --user rpi.gpio
 git clone https://github.com/noyuno/room
 ~~~
 
@@ -54,9 +55,14 @@ git clone https://github.com/noyuno/dotfiles
 mpg321 pastel-house.mp3
 ~~~
 
-## Radiko
+## Radikoテスト
 
 ~~~
 bash play_radiko.sh
 ~~~
 
+## Pythonスクリプト
+
+~~~
+python3 run.py
+~~~
