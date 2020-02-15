@@ -65,4 +65,11 @@ bash play_radiko.sh
 
 ~~~
 python3 run.py
+DEBUG=1 python3 run.py
+~~~
+
+## 10. 赤外線で各種機器を操作
+
+~~~
+
 ~~~
