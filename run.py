@@ -33,6 +33,30 @@ def initlogger():
     logger.addHandler(consoleHandler)
     return logger, starttime
 
+class Led():
+  def __init__(self, logger):
+    # GPIOの準備
+    if not os.environ.get('DEBUG'):
+      GPIO.setmode(GPIO.BCM)
+
+    # SW1, SW2ピン入力設定
+    if not os.environ.get('DEBUG'):
+      GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+      GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    # LED1, 2, 3, 4ピン出力設定
+      GPIO.setup(17, GPIO.OUT)
+      GPIO.setup(18, GPIO.OUT)
+      GPIO.setup(22, GPIO.OUT)
+      GPIO.setup(27, GPIO.OUT)
+
+
+  def on(self, mode, radio):
+    GPIO.output(17, int(mode))
+    GPIO.output(18, int(int(radio / 4) % 2))
+    GPIO.output(22, int(int(radio / 2) % 2))
+    GPIO.output(27, int(int(radio / 1) % 2))
+
 class Radio():
   def __init__(self, logger):
     self.logger = logger
@@ -136,42 +160,31 @@ def main(logger):
   radio = Radio(logger)
   radio.auth()
   radio.nextchannel()
-
-  # GPIOの準備
-  if not os.environ.get('DEBUG'):
-    GPIO.setmode(GPIO.BCM)
-
-  # SW1, SW2ピン入力設定
-  if not os.environ.get('DEBUG'):
-    GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-  # LED1, 2, 3, 4ピン出力設定
-    GPIO.setup(17, GPIO.OUT)
-    GPIO.setup(18, GPIO.OUT)
-    GPIO.setup(22, GPIO.OUT)
-    GPIO.setup(27, GPIO.OUT)
+  led = Led(logger)
 
   try:
     while True:
-      # SW1が押された場合
-      if 0==GPIO.input(5):
-        radio.nextchannel()
-
-      # SW2
+      # SW2 blackが押された場合
       if 0==GPIO.input(6):
+        radio.nextchannel()
+        
+      # SW1 red
+      mode = int(0==GPIO.input(5))
+      # if 0==GPIO.input(5):
         # LED1, 2, 3, 4 点灯
-        GPIO.output(17, 1)
-        GPIO.output(18, 1)
-        GPIO.output(22, 1)
-        GPIO.output(27, 1)
+        # GPIO.output(17, 1)
+        # GPIO.output(18, 1)
+        # GPIO.output(22, 1)
+        # GPIO.output(27, 1)
       #SW2押されていない場合
-      else:
+      # else:
         # LED1, 2, 3, 4 消灯
-        GPIO.output(17, 0)
-        GPIO.output(18, 0)
-        GPIO.output(22, 0)
-        GPIO.output(27, 0)
+        # GPIO.output(17, 0)
+        # GPIO.output(18, 0)
+        # GPIO.output(22, 0)
+        # GPIO.output(27, 0)
+
+      led.on(mode, radio.current)
       time.sleep(0.01)
 
   # Ctrl+Cが押されたらGPIOを解放
