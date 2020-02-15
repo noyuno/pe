@@ -218,6 +218,7 @@ class Main():
         if 0==self.led.human():
           # 部屋の中に人がいない
           if stoptimer == None or stoptimer.is_alive() == False:
+            self.logger.debug('starting stoptimer')
             stoptimer = threading.Timer(60, self.stop)
             stoptimer.start()
         else:
