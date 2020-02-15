@@ -134,6 +134,8 @@ class Radio():
       stdout=subprocess.PIPE, shell=False)
     self.mplayer = subprocess.Popen([
       'mplayer',
+      '-channels', '2',
+      '-af', 'pan=1:1',
       '-'],
       stdin=self.rtmpdump.stdout, shell=False)
     
