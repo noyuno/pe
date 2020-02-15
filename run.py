@@ -44,18 +44,29 @@ class Led():
       GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
       GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-    # LED1, 2, 3, 4ピン出力設定
+      # LED1, 2, 3, 4ピン出力設定
       GPIO.setup(17, GPIO.OUT)
       GPIO.setup(18, GPIO.OUT)
       GPIO.setup(22, GPIO.OUT)
       GPIO.setup(27, GPIO.OUT)
-
+      
+      # human sensor
+      GPIO.setup(23, GPIO.IN)
 
   def on(self, mode, radio):
     GPIO.output(17, int(mode))
     GPIO.output(18, int(int(radio / 4) % 2))
     GPIO.output(22, int(int(radio / 2) % 2))
     GPIO.output(27, int(int(radio / 1) % 2))
+
+  def human(self):
+    return int(0==GPIO.input(23))
+
+  def sw1(self):
+    return int(0==GPIO.input(5))
+
+  def sw2(self):
+    return int(0==GPIO.input(6))
 
 class Radio():
   def __init__(self, logger):
@@ -167,11 +178,13 @@ def main(logger):
   try:
     while True:
       # SW2 blackが押された場合
-      if 0==GPIO.input(6):
+      if led.sw2():
         radio.nextchannel()
         
       # SW1 red
-      mode = int(0==GPIO.input(5))
+      mode = led.sw1()
+      # human sensor
+      mode = led.human()
       # if 0==GPIO.input(5):
         # LED1, 2, 3, 4 点灯
         # GPIO.output(17, 1)
@@ -198,12 +211,6 @@ def main(logger):
     GPIO.cleanup(22)
     GPIO.cleanup(27)
     radio.close()
-
-
-
-
-
-
 
 if __name__ == "__main__":
   logger, starttime = initlogger()
