@@ -5,10 +5,9 @@ if len(sys.argv) < 2:
   sys.exit(1)
 name = sys.argv[1]
 
-try:
-  conf = open('lirc/lircd.conf.d/{}'.format(name), 'w')
+conf = open('lirc/lircd.conf.d/{}.conf'.format(name), 'w')
 
-  conf.write('''\
+conf.write('''\
 begin remote
  name {}
  flags RAW_CODES
@@ -21,22 +20,23 @@ begin remote
  name button
 '''.format(name))
 
-  with open('ir/{}'.format(name), 'r') as mode2:
-    num = 1
-    while True:
-      line = mode2.stdout.readline()
-      if line is None:
-        break
-      if num < 3:
-        continue
-      if num % 2 == 0:
-        conf.write(' ' + line)
-      else:
-        conf.write(line.strip('\n'))
-      num += 1
+with open('ir/{}'.format(name), 'r') as mode2:
+  num = 0
+  while True:
+    num += 1
+    line = mode2.readline()
+    if not line:
+      break
+    if num < 3:
+      continue
+    v = line.split(' ')[1]
+    if num % 2 == 0:
+      conf.write(' ' + v)
+    else:
+      conf.write(' ' + v.strip('\n'))
 
-  conf.write('''
- end raw_codes
+conf.write('''
+end raw_codes
 end remote
 ''')
-  conf.close()
+conf.close()
