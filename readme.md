@@ -30,7 +30,7 @@
 ~~~
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools libxml2-utils python3-pip
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools libxml2-utils python3-pip libi2c-dev wiringpi
 pip3 install --user rpi.gpio
 git clone https://github.com/noyuno/room
 ~~~
