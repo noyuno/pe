@@ -186,11 +186,17 @@ class Scheduler():
   def run(self):
     asyncio.set_event_loop(self.loop)
     self.logger.debug('launch scheduler')
-    schedule.every().day.at('06:30').do(self.main.morning)
-    schedule.every().day.at('00:00').do(self.main.night)
+    schedule.every().day.at('06:30').do(self.morning)
+    schedule.every().day.at('00:00').do(self.night)
     while True:
       schedule.run_pending()
       time.sleep(1)
+
+  def night(self):
+    self.main.night()
+
+  def morning(self):
+    self.main.morning()
 
 class Main():
   def __init__(self, logger):
