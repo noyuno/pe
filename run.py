@@ -188,6 +188,9 @@ class Scheduler():
     self.logger.debug('launch scheduler')
     schedule.every().day.at('06:30').do(self.main.morning)
     schedule.every().day.at('00:00').do(self.main.night)
+    while True:
+      schedule.run_pending()
+      time.sleep(1)
 
 class Main():
   def __init__(self, logger):
