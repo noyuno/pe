@@ -191,7 +191,7 @@ class Scheduler():
       morningtime = '06:20'
     nighttime = os.environ.get('NIGHT')
     if nighttime is None:
-      nighttime = '00:00'
+      nighttime = '00:30'
     schedule.every().day.at(morningtime).do(self.main.morning)
     schedule.every().day.at(nighttime).do(self.main.night)
     while True:
