@@ -210,9 +210,9 @@ class Main():
 
   def start(self):
     self.logger.debug('There seem to be people, starting radio')
-    self.radio.nextchannel()
-    subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
-    subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
+    #self.radio.nextchannel()
+    #subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
+    #subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
     self.mode = 1
 
   def stop(self):
