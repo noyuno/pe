@@ -1,12 +1,13 @@
 import sys
 import subprocess
 
-if len(sys.argv) < 3:
-  sys.stderr.write('python3 scan.py name')
+if len(sys.argv) < 2:
+  sys.stderr.write('python3 scan.py name\n')
+  sys.exit(1)
 name = sys.argv[1]
 
 try:
-  conf = open('lirc/lirc.conf.d/{}'.format(name), 'w')
+  conf = open('lirc/lircd.conf.d/{}'.format(name), 'w')
   conf.write('''\
 begin remote
  name {}
