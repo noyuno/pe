@@ -211,29 +211,29 @@ class Main():
   def start(self):
     self.logger.debug('There seem to be people, starting radio')
     self.radio.nextchannel()
-    subprocess.run(['irsend' 'SEND_ONCE' 'iris-toggle' 'button'])
-    subprocess.run(['irsend' 'SEND_ONCE' 'ac-heating' 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
     self.mode = 1
 
   def stop(self):
     self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
-    subprocess.run(['irsend' 'SEND_ONCE' 'iris-off' 'button'])
-    subprocess.run(['irsend' 'SEND_ONCE' 'ac-off' 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
     self.mode = 0
 
   def night(self):
     self.logger.debug('night mode')
     self.radio.stop()
-    subprocess.run(['irsend' 'SEND_ONCE' 'iris-off' 'button'])
-    subprocess.run(['irsend' 'SEND_ONCE' 'ac-off' 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
     self.mode = 0
     self.nightmode = 1
   
   def morning(self):
     self.logger.debug('morning mode')
-    subprocess.run(['irsend' 'SEND_ONCE' 'iris-toggle' 'button'])
-    subprocess.run(['irsend' 'SEND_ONCE' 'ac-heating' 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
+    subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
     self.nightmode = 0
 
   def close(self):
