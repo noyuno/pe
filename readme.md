@@ -7,7 +7,7 @@
 5. RPZ-IR-Sensor(4450円)
 6. 人感センサ
 
-※RPI4は4.14不可
+※RPI4はlinux 4.14不可(赤外線は4.14のみ確認)
 
 ## 2. 仕様
 
@@ -32,7 +32,7 @@ sudo apt-mark hold raspberrypi-kernel raspberrypi-bootloader
 sudo apt update
 sudo apt -y upgrade
 sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc
-pip3 install --user rpi.gpio
+pip3 install --user rpi.gpio schedule
 git clone https://github.com/noyuno/room
 ~~~
 
@@ -62,6 +62,27 @@ mpg321 pastel-house.mp3
 bash play_radiko.sh
 ~~~
 
+## 10. 赤外線で各種機器の操作テスト
+
+~~~
+mkdir ir
+sudo systemctl stop lircd
+sudo rm -rf /etc/lirc
+sudo ln -sfnv $HOME/room/lirc /etc/lirc
+
+mode2 -d /dev/lirc0 > ir/iris-toggle
+(C-C)
+python3 convert.py iris-toggle
+
+mode2 -d /dev/lirc0 > ir/ac-heating
+(C-C)
+python3 convert.py ac-heating
+
+sudo systemctl restart lircd
+irsend SEND_ONCE iris-toggle button
+irsend SEND_ONCE ac-heating button
+~~~
+
 ## 9. Pythonスクリプト
 
 ~~~
@@ -69,8 +90,13 @@ python3 run.py
 DEBUG=1 python3 run.py
 ~~~
 
-## 10. 赤外線で各種機器を操作
+## Pythonスクリプトをデーモン化
 
-
+~~~
+sudo cp room.service /etc/systemd/system/
+sudo systemctl start room
+sudo systemctl status room
+sudo systemctl enable room
+~~~
 
 ## トラブルシューティング

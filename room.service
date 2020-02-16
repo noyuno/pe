@@ -1,0 +1,10 @@
+[Unit]
+Description = room service
+
+[Service]
+ExecStart = /usr/bin/python3 /home/pi/room/run.py
+Restart = on-failure
+Type = simple
+
+[Install]
+WantedBy = multi-user.target

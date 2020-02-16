@@ -1,4 +1,4 @@
-# requirements: swfextract (swftools), rtmpdump, mplayer
+# requirements: swfextract (swftools), rtmpdump, mplayer, irsend(lirc)
 
 import os
 import time
@@ -11,6 +11,7 @@ import subprocess
 import urllib.parse
 import threading
 import logging
+import schedule
 
 def initlogger():
     logdir = './logs'
@@ -158,12 +159,6 @@ class Radio():
         self.current = 0
       else:
         self.current += 1
-    # if self.thread != None and self.thread.is_alive():
-    #   self.thread.
-    # self.thread = threading.Thread(target=self.changechannel, kwargs={
-    #   'channel': self.channels[self.current]
-    # })
-    # self.thread.start()
     self.changechannel(self.channels[self.current])
 
   def close(self):
@@ -175,12 +170,27 @@ class Radio():
     if self.rtmpdump != None and self.rtmpdump.poll() == None:
       self.rtmpdump.kill()
 
+class Scheduler():
+  def __init__(self, logger, loop, main):
+    self.logger = logger
+    self.loop = loop
+    self.main = main
+
+  def run(self):
+    asyncio.set_event_loop(self.loop)
+    self.logger.debug('launch scheduler')
+    schedule.every().day.at('06:30').do(self.main.morning)
+    schedule.every().day.at('00:00').do(self.main.night)
+
 class Main():
   def __init__(self, logger):
     self.logger = logger
     self.radio = Radio(self.logger)
     self.led = Led(logger)
+    self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
+    self.scheduler.run()
     self.mode = 1
+    self.night = 0
 
   def start(self):
     self.radio.nextchannel()
@@ -190,6 +200,18 @@ class Main():
     self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
     self.mode = 0
+
+  def night(self):
+    self.logger.debug('night mode')
+    self.radio.stop()
+    self.mode = 0
+    self.night = 1
+  
+  def morning(self):
+    self.logger.debug('morning mode')
+    subprocess.run(['irsend' 'SEND_ONCE' 'iris-toggle' 'button'])
+    subprocess.run(['irsend' 'SEND_ONCE' 'ac-heating' 'button'])
+    self.night = 0
 
   def close(self):
     self.led.close()
@@ -213,7 +235,7 @@ class Main():
             self.logger.debug('starting stoptimer')
             stoptimer = threading.Timer(60, self.stop)
             stoptimer.start()
-        else:
+        elif night == 0:
           # 部屋の中に人がいる
           if stoptimer != None and stoptimer.is_alive() == True:
             self.logger.debug('canceling stoptimer')
