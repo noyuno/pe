@@ -238,8 +238,8 @@ class Main():
         # 子プロセスの死活監視(1secごと)
         if counter % 20 == 0:
           counter = 0
-          if (self.mplayer != None and self.mplayer.poll() != None) or \
-            (self.rtmpdump != None and self.rtmpdump.poll() != None):
+          if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
+            (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
             self.logger.debug('radio process dead. restarting...')
             self.radio.stop()
             self.radio.nextchannel()
