@@ -188,7 +188,7 @@ class Scheduler():
     self.logger.debug('launch scheduler')
     morningtime = os.environ.get('MORNING')
     if morningtime is None:
-      morningtime = '06:30'
+      morningtime = '06:20'
     nighttime = os.environ.get('NIGHT')
     if nighttime is None:
       nighttime = '00:00'
