@@ -186,17 +186,11 @@ class Scheduler():
   def run(self):
     asyncio.set_event_loop(self.loop)
     self.logger.debug('launch scheduler')
-    schedule.every().day.at('06:30').do(self.morning)
-    schedule.every().day.at('00:00').do(self.night)
+    schedule.every().day.at('06:30').do(self.main.morning)
+    schedule.every().day.at('00:00').do(self.main.night)
     while True:
       schedule.run_pending()
       time.sleep(1)
-
-  def night(self):
-    self.main.night()
-
-  def morning(self):
-    self.main.morning()
 
 class Main():
   def __init__(self, logger):
@@ -206,7 +200,7 @@ class Main():
     self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
     threading.Thread(target=self.scheduler.run, name='scheduler').start()
     self.mode = 1
-    self.night = 0
+    self.nightmode = 0
 
   def start(self):
     self.logger.debug('There seem to be people, starting radio')
@@ -228,13 +222,13 @@ class Main():
     subprocess.run(['irsend' 'SEND_ONCE' 'iris-off' 'button'])
     subprocess.run(['irsend' 'SEND_ONCE' 'ac-off' 'button'])
     self.mode = 0
-    self.night = 1
+    self.nightmode = 1
   
   def morning(self):
     self.logger.debug('morning mode')
     subprocess.run(['irsend' 'SEND_ONCE' 'iris-toggle' 'button'])
     subprocess.run(['irsend' 'SEND_ONCE' 'ac-heating' 'button'])
-    self.night = 0
+    self.nightmode = 0
 
   def close(self):
     self.led.close()
@@ -270,7 +264,7 @@ class Main():
             self.logger.debug('starting stoptimer')
             stoptimer = threading.Timer(60, self.stop)
             stoptimer.start()
-        elif self.night == 0:
+        elif self.nightmode == 0:
           # 部屋の中に人がいる
           if stoptimer != None and stoptimer.is_alive() == True:
             self.logger.debug('canceling stoptimer')
