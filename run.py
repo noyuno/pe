@@ -194,12 +194,17 @@ class Main():
     self.night = 0
 
   def start(self):
+    self.logger.debug('There seem to be people, starting radio')
     self.radio.nextchannel()
+    subprocess.run(['irsend' 'SEND_ONCE' 'iris-toggle' 'button'])
+    subprocess.run(['irsend' 'SEND_ONCE' 'ac-heating' 'button'])
     self.mode = 1
 
   def stop(self):
     self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
+    subprocess.run(['irsend' 'SEND_ONCE' 'iris-off' 'button'])
+    subprocess.run(['irsend' 'SEND_ONCE' 'ac-off' 'button'])
     self.mode = 0
 
   def night(self):

@@ -78,6 +78,14 @@ mode2 -d /dev/lirc0 > ir/ac-heating
 (C-C)
 python3 convert.py ac-heating
 
+mode2 -d /dev/lirc0 > ir/iris-off
+(C-C)
+python3 convert.py iris-off
+
+mode2 -d /dev/lirc0 > ir/ac-off
+(C-C)
+python3 convert.py ac-off
+
 sudo systemctl restart lircd
 irsend SEND_ONCE iris-toggle button
 irsend SEND_ONCE ac-heating button
