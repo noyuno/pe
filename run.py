@@ -282,7 +282,7 @@ class Main():
     except Exception as e:
       exc_type, exc_obj, tb = sys.exc_info()
       lineno = tb.tb_lineno
-      self.logger.error("Unexpected error:{}: {}".format(lineno, str(type(e))))
+      self.logger.error("Unexpected error: line {}: {}: {}".format(lineno, str(type(e)), e))
       self.close()
 
 if __name__ == "__main__":
