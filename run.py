@@ -23,7 +23,7 @@ def initlogger():
     else:
         logger.setLevel(logging.INFO)
     logFormatter = logging.Formatter(fmt='%(asctime)s %(levelname)s: %(message)s',
-                                     datefmt='%Y%m%d-%H%S')
+                                     datefmt='%Y%m%d-%H%M')
     fileHandler = logging.FileHandler('{}/{}'.format(logdir, starttime))
     fileHandler.setFormatter(logFormatter)
     logger.addHandler(fileHandler)
@@ -147,13 +147,8 @@ class Radio():
       '-C', 'S:', '-C', 'S:', '-C', 'S:', '-C', 'S:' + self.authtoken,
       '--live']
     self.logger.debug(' '.join(command))
-    self.rtmpdump = subprocess.Popen(command,
-      stdout=subprocess.PIPE, shell=False)
-    self.mplayer = subprocess.Popen([
-      'mplayer',
-      '-channels', '2',
-      '-af', 'pan=1:1',
-      '-'],
+    self.rtmpdump = subprocess.Popen(command, stdout=subprocess.PIPE, shell=False)
+    self.mplayer = subprocess.Popen(['mplayer', '-channels', '2', '-af', 'pan=1:1', '-'],
       stdin=self.rtmpdump.stdout, shell=False)
     
   def nextchannel(self):
@@ -221,6 +216,7 @@ class Main():
         else:
           # 部屋の中に人がいる
           if stoptimer != None and stoptimer.is_alive() == True:
+            self.logger.debug('canceling stoptimer')
             stoptimer.cancel()
           if self.mode == 0:
             self.start()

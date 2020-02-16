@@ -6,8 +6,7 @@
 2. ダイソー スピーカ(300円)（改造）
 5. RPZ-IR-Sensor(4450円)
 6. 人感センサ
-7. 各種ケーブル
-8. 各種トランジスタ
+7. 2019-04-08-raspbian-stretch-lite
 
 ## 2. 仕様
 
@@ -28,8 +27,8 @@
 ## 4. 必要なソフトのインストール
 
 ~~~
+sudo apt-mark hold raspberrypi-kernel linux
 sudo apt update
-sudo apt upgrade -y
 sudo apt install -y libusb-dev git mpg321 rtmpdump swftools libxml2-utils python3-pip libi2c-dev wiringpi
 pip3 install --user rpi.gpio
 git clone https://github.com/noyuno/room
@@ -70,6 +69,5 @@ DEBUG=1 python3 run.py
 
 ## 10. 赤外線で各種機器を操作
 
-~~~
+[LIRCでRaspberry Piの赤外線制御 (Raspbian Stretchの設定方法) – Indoor Corgi](https://www.indoorcorgielec.com/resources/%e5%bf%9c%e7%94%a8%e4%be%8b/lirc%e3%81%a7rpitph-monitor-rpz-ir-sensor%e3%81%ae%e8%b5%a4%e5%a4%96%e7%b7%9a%e5%88%b6%e5%be%a1/lirc%e3%81%a7rpitph-monitor-rpz-ir-sensor%e3%81%ae%e8%b5%a4%e5%a4%96%e7%b7%9a%e5%88%b6%e5%be%a1-stretch/)
 
-~~~
