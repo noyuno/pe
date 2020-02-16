@@ -44,6 +44,13 @@ git clone https://github.com/noyuno/dotfiles
 ./dotfiles/bin/dfdeploy
 ~~~
 
+RPiZeroでdotfilesの設定は重すぎてスクリプトが落ちるほどなので、適用しないこと。
+
+~~~
+rm .tmux.conf
+
+~~~
+
 ## 6. 改造（任意）
 
 分解してモノラル化。またコードの長さを短くしてはんだ付けをする。

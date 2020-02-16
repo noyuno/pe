@@ -141,7 +141,7 @@ class Radio():
     if self.rtmpdump != None and self.rtmpdump.poll() == None:
       self.rtmpdump.kill()
     
-    command = [
+    rtmpdumpcommand = [
       'rtmpdump',
       '-v',
       '-r', '{}://{}'.format(u.scheme, u.netloc),
@@ -150,10 +150,14 @@ class Radio():
       '-W', self.player.url,
       '-C', 'S:', '-C', 'S:', '-C', 'S:', '-C', 'S:' + self.authtoken,
       '--live']
-    self.logger.debug(' '.join(command))
-    self.rtmpdump = subprocess.Popen(command, stdout=subprocess.PIPE, shell=False)
-    self.mplayer = subprocess.Popen(['mplayer', '-channels', '2', '-af', 'pan=1:1', '-'],
-      stdin=self.rtmpdump.stdout, shell=False)
+    if not os.environ.get('DEBUG'):
+      rtmpdumpcommand.append('-q')
+    self.logger.debug(' '.join(rtmpdumpcommand))
+    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, shell=False)
+    mplayercommand = ['mplayer', '-channels', '2', '-af', 'pan=1:1', '-']
+    if not os.environ.get('DEBUG'):
+      mplayercommand.append('-quiet')
+    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout, shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
