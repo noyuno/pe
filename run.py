@@ -241,7 +241,7 @@ class Main():
             self.logger.debug('starting stoptimer')
             stoptimer = threading.Timer(60, self.stop)
             stoptimer.start()
-        elif night == 0:
+        elif self.night == 0:
           # 部屋の中に人がいる
           if stoptimer != None and stoptimer.is_alive() == True:
             self.logger.debug('canceling stoptimer')
@@ -264,6 +264,9 @@ class Main():
 
     # Ctrl+Cが押されたらGPIOを解放
     except KeyboardInterrupt:
+      self.close()
+    except:
+      self.logger.error("Unexpected error:{}".format(sys.exc_info()[0]))
       self.close()
 
 if __name__ == "__main__":
