@@ -14,6 +14,7 @@ import threading
 import logging
 import schedule
 import asyncio
+import linecache
 
 def initlogger():
     logdir = './logs'
@@ -278,8 +279,10 @@ class Main():
     # Ctrl+Cが押されたらGPIOを解放
     except KeyboardInterrupt:
       self.close()
-    except:
-      self.logger.error("Unexpected error:{}".format(sys.exc_info()[0]))
+    except Exception as e:
+      exc_type, exc_obj, tb = sys.exc_info()
+      lineno = tb.tb_lineno
+      self.logger.error("Unexpected error:{}: {}".format(lineno, str(type(e))))
       self.close()
 
 if __name__ == "__main__":
