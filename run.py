@@ -228,8 +228,20 @@ class Main():
     self.radio.nextchannel()
     stoptimer = None
 
+    counter = 0
     try:
       while True:
+        counter += 1
+
+        # 子プロセスの死活監視(1secごと)
+        if counter % 20 == 0:
+          counter = 0
+          if (self.mplayer != None and self.mplayer.poll() != None) or \
+            (self.rtmpdump != None and self.rtmpdump.poll() != None):
+            self.logger.debug('radio process dead. restarting...')
+            self.radio.stop()
+            self.radio.nextchannel()
+    
         # SW2 blackが押された場合
         if self.led.sw2():
           self.radio.nextchannel()
@@ -260,7 +272,7 @@ class Main():
           pass
 
         self.led.on(hmode, self.radio.current)
-        time.sleep(0.01)
+        time.sleep(0.05)
 
     # Ctrl+Cが押されたらGPIOを解放
     except KeyboardInterrupt:
