@@ -1,6 +1,7 @@
 # requirements: swfextract (swftools), rtmpdump, mplayer, irsend(lirc)
 
 import os
+import sys
 import time
 from datetime import datetime
 import RPi.GPIO as GPIO
