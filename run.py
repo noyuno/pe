@@ -198,7 +198,7 @@ class Main():
     self.radio = Radio(self.logger)
     self.led = Led(logger)
     self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
-    self.scheduler.run()
+    threading.Thread(target=self.scheduler.run, name='scheduler').start()
     self.mode = 1
     self.night = 0
 
@@ -219,6 +219,8 @@ class Main():
   def night(self):
     self.logger.debug('night mode')
     self.radio.stop()
+    subprocess.run(['irsend' 'SEND_ONCE' 'iris-off' 'button'])
+    subprocess.run(['irsend' 'SEND_ONCE' 'ac-off' 'button'])
     self.mode = 0
     self.night = 1
   
