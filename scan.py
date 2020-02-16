@@ -6,10 +6,10 @@ if len(sys.argv) < 3:
 name = sys.argv[1]
 
 try:
-  conf = open(f'lirc/lirc.conf.d/{name}', 'w')
-  conf.write(f'''\
+  conf = open('lirc/lirc.conf.d/{}'.format(name), 'w')
+  conf.write('''\
 begin remote
- name {name}
+ name {}
  flags RAW_CODES
  eps 30
  aeps 100
@@ -18,7 +18,7 @@ begin remote
 
  begin raw_codes
  name button
-''')
+'''.format(name))
   print('type C-C to complete')
   mode2 = subprocess.Popen(['mode2', '-d', '/dev/lirc0'], stdout=subprocess.PIPE, shell=False)
   num = 1
@@ -32,7 +32,7 @@ begin remote
       conf.write(line.strip('\n'))
     num += 1
 except KeyboardInterrupt:
-  conf.write(f'''
+  conf.write('''
  end raw_codes
 end remote
 ''')

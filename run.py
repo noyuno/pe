@@ -120,15 +120,15 @@ class Radio():
     if auth2.status_code != 200:
       raise ConnectionError('failed auth2 process')
     areaid = auth2.content.decode('utf-8').replace('\r\n', '').split(',')[0]
-    self.logger.debug(f'areaid={areaid}, self.authtoken={self.authtoken}')
+    self.logger.debug('areaid={}, self.authtoken={}'.format(areaid, self.authtoken))
     # get channel list
-    chan = requests.get(f'http://radiko.jp/v2/api/program/today?area_id={areaid}')
+    chan = requests.get('http://radiko.jp/v2/api/program/today?area_id={}'.format(areaid))
     for i in et.fromstring(chan.content).findall('./stations/station[@id]'):
       self.channels.append(i.attrib['id'])
-    self.logger.debug(f'self.channels={self.channels}')
+    self.logger.debug('self.channels={}'.format(self.channels))
 
   def changechannel(self, channel):
-    r = requests.get(f'http://radiko.jp/v2/station/stream/{channel}.xml')
+    r = requests.get('http://radiko.jp/v2/station/stream/{}.xml'.format(channel))
     streamurl = et.fromstring(r.content).find('./item').text
     u = urllib.parse.urlparse(streamurl)
 
@@ -140,7 +140,7 @@ class Radio():
     command = [
       'rtmpdump',
       '-v',
-      '-r', f'{u.scheme}://{u.netloc}',
+      '-r', '{}://{}'.format(u.scheme, u.netloc),
       '--app', '/'.join(u.path.strip('/').split('/')[:-1]),
       '--playpath', u.path.split('/')[-1],
       '-W', self.player.url,
