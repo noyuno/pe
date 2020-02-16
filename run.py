@@ -210,6 +210,7 @@ class Main():
 
   def start(self):
     self.logger.debug('There seem to be people... nothing to do')
+    # 人がいないはずなのにご認識するので、コメントアウト
     #self.radio.nextchannel()
     #subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
     #subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
