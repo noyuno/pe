@@ -209,11 +209,11 @@ class Main():
     self.nightmode = 0
 
   def start(self):
-    self.logger.debug('There seem to be people, starting radio')
+    self.logger.debug('There seem to be people... nothing to do')
     #self.radio.nextchannel()
     #subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
     #subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
-    self.mode = 1
+    #self.mode = 1
 
   def stop(self):
     self.logger.debug('There seem to be no people, stopping radio')
