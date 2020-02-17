@@ -16,6 +16,16 @@ import schedule
 import asyncio
 import linecache
 
+class LoggerWriter():
+  def __init__(self, level, input):
+    self.level = level
+    self.input = input
+  def write(self, message):
+    if message != '\n':
+      self.level(message)
+  def flush(self):
+    self.level(self.input)
+
 def initlogger():
     logdir = './logs'
     os.makedirs(logdir, exist_ok=True)
@@ -34,6 +44,8 @@ def initlogger():
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(logFormatter)
     logger.addHandler(consoleHandler)
+    sys.stdout = LoggerWriter(logger.debug)
+    sys.stderr = LoggerWriter(logger.warning)
     return logger, starttime
 
 class Led():
@@ -52,7 +64,7 @@ class Led():
     GPIO.setup(27, GPIO.OUT)
     
     # human sensor
-    GPIO.setup(23, GPIO.IN)
+    # GPIO.setup(23, GPIO.IN)
 
   def on(self, mode, radio):
     GPIO.output(17, int(mode))
@@ -60,8 +72,8 @@ class Led():
     GPIO.output(22, int(int(radio / 2) % 2))
     GPIO.output(27, int(int(radio / 1) % 2))
 
-  def human(self):
-    return int(1==GPIO.input(23))
+  # def human(self):
+  #   return int(1==GPIO.input(23))
 
   def sw1(self):
     return int(0==GPIO.input(5))
@@ -76,7 +88,7 @@ class Led():
       GPIO.cleanup(18)
       GPIO.cleanup(22)
       GPIO.cleanup(27)
-      GPIO.cleanup(23)
+      # GPIO.cleanup(23)
 
 class Radio():
   def __init__(self, logger):
@@ -153,11 +165,11 @@ class Radio():
     if not os.environ.get('DEBUG'):
       rtmpdumpcommand.append('-q')
     self.logger.debug(' '.join(rtmpdumpcommand))
-    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, shell=False)
+    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, stderr=LoggerWriter(self.logger.warning), shell=False)
     mplayercommand = ['mplayer', '-channels', '2', '-af', 'pan=1:1', '-']
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
-    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout, shell=False)
+    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout, stdout=LoggerWriter(self.logger.debug), stderr=LoggerWriter(self.logger.warning), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
@@ -185,6 +197,8 @@ class Scheduler():
 
   def run(self):
     asyncio.set_event_loop(self.loop)
+    sys.stdout = LoggerWriter(self.logger.debug)
+    sys.stderr = LoggerWriter(self.logger.warning)
     self.logger.debug('launch scheduler')
     morningtime = os.environ.get('MORNING')
     if morningtime is None:
@@ -265,25 +279,26 @@ class Main():
           self.radio.nextchannel()
 
         # timer -> stop
-        if 0==self.led.human():
-          # 部屋の中に人がいない
-          if self.mode == 1 and (stoptimer == None or stoptimer.is_alive() == False):
-            self.logger.debug('starting stoptimer')
-            stoptimer = threading.Timer(60, self.stop)
-            stoptimer.start()
-        elif self.nightmode == 0:
-          # 部屋の中に人がいる
-          if stoptimer != None and stoptimer.is_alive() == True:
-            self.logger.debug('canceling stoptimer')
-            stoptimer.cancel()
-          if self.mode == 0:
-            self.start()
+        # if 0==self.led.human():
+        #   # 部屋の中に人がいない
+        #   if self.mode == 1 and (stoptimer == None or stoptimer.is_alive() == False):
+        #     self.logger.debug('starting stoptimer')
+        #     stoptimer = threading.Timer(60, self.stop)
+        #     stoptimer.start()
+        # elif self.nightmode == 0:
+        #   # 部屋の中に人がいる
+        #   if stoptimer != None and stoptimer.is_alive() == True:
+        #     self.logger.debug('canceling stoptimer')
+        #     stoptimer.cancel()
+        #   if self.mode == 0:
+        #     self.start()
 
         # human sensor -> led
-        hmode = int(not(self.led.human()))
+        # hmode = int(not(self.led.human()))
         # SW1 red
-        if hmode == 0:
-          hmode = self.led.sw1()
+        # if hmode == 0:
+          # hmode = self.led.sw1()
+        hmode = self.led.sw1()
 
         # send ir
         if self.led.sw1():
