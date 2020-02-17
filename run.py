@@ -20,10 +20,9 @@ class LoggerWriter():
   def __init__(self, logger, level):
     self.level = level
     self.logger = logger
-  def write(self, message):
-    if message != '\n':
-      for line in buf.rstrip().splitlines():
-        self.logger.log(self.level, line.rstrip())
+  def write(self, buf):
+    for line in buf.rstrip().splitlines():
+      self.logger.log(self.level, line.rstrip())
   def flush(self):
     self.logger.log(self.level, sys.stderr)
 
