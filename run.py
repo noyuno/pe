@@ -132,8 +132,8 @@ class Radio():
     self.authtoken = auth1.headers['x-radiko-authtoken']
     offset = auth1.headers['x-radiko-keyoffset']
     length = auth1.headers['x-radiko-keylength']
-    swf = subprocess.check_output(['swfextract', '-b', '12', '/dev/stdin', '-o', '/dev/stdout'], input=self.player.content)
-    dd = subprocess.check_output(['dd', 'bs=1', 'skip=' + offset, 'count=' + length], input=swf)
+    swf = subprocess.check_output(['swfextract', '-b', '12', '/dev/stdin', '-o', '/dev/stdout'], input=self.player.content, stderr=LoggerWriter(self.logger, logging.WARNING))
+    dd = subprocess.check_output(['dd', 'bs=1', 'skip=' + offset, 'count=' + length], input=swf, stderr=LoggerWriter(self.logger, logging.WARNING))
     partialkey = base64.b64encode(dd)
     auth2 = requests.post('https://radiko.jp/v2/api/auth2_fms',
       headers={
@@ -183,7 +183,8 @@ class Radio():
     mplayercommand = ['mplayer', '-channels', '2', '-af', 'pan=1:1', '-']
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
-    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout, stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
+    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
+      stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
@@ -236,6 +237,10 @@ class Main():
     self.mode = 1
     self.nightmode = 0
 
+  def subrun(self, command):
+    self.logger.info('executing command: {}'.format(' '.join(command)))
+    return subprocess.run(command, stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING))
+
   def start(self):
     self.logger.debug('There seem to be people... nothing to do')
     # 人がいないはずなのにご認識するので、コメントアウト
@@ -247,22 +252,22 @@ class Main():
   def stop(self):
     self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
-    subprocess.run(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
-    subprocess.run(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
+    self.subrun(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
+    self.subrun(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
     self.mode = 0
 
   def night(self):
     self.logger.debug('night mode')
     self.radio.stop()
-    subprocess.run(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
-    subprocess.run(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
+    self.subrun(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
+    self.subrun(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
     self.mode = 0
     self.nightmode = 1
   
   def morning(self):
     self.logger.debug('morning mode')
-    subprocess.run(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
-    subprocess.run(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
+    self.subrun(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
+    self.subrun(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
     self.nightmode = 0
 
   def close(self):
@@ -284,7 +289,7 @@ class Main():
           counter = 0
           if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
             (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
-            self.logger.debug('radio process dead. restarting...')
+            self.logger.warning('radio process dead. restarting...')
             self.radio.stop()
             self.radio.nextchannel()
     
