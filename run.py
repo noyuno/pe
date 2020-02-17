@@ -165,11 +165,11 @@ class Radio():
     if not os.environ.get('DEBUG'):
       rtmpdumpcommand.append('-q')
     self.logger.debug(' '.join(rtmpdumpcommand))
-    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, stderr=LoggerWriter(self.logger.warning), shell=False)
+    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
     mplayercommand = ['mplayer', '-channels', '2', '-af', 'pan=1:1', '-']
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
-    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout, stdout=LoggerWriter(self.logger.debug), stderr=LoggerWriter(self.logger.warning), shell=False)
+    self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout, stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
