@@ -17,14 +17,15 @@ import asyncio
 import linecache
 
 class LoggerWriter():
-  def __init__(self, level, input):
+  def __init__(self, logger, level):
     self.level = level
-    self.input = input
+    self.logger = logger
   def write(self, message):
     if message != '\n':
-      self.level(message)
+      for line in buf.rstrip().splitlines():
+        self.logger.log(self.level, line.rstrip())
   def flush(self):
-    self.level(self.input)
+    self.logger.log(self.level, sys.stderr)
 
 def initlogger():
     logdir = './logs'
@@ -44,8 +45,8 @@ def initlogger():
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(logFormatter)
     logger.addHandler(consoleHandler)
-    sys.stdout = LoggerWriter(logger.debug)
-    sys.stderr = LoggerWriter(logger.warning)
+    sys.stdout = LoggerWriter(logger, logging.DEBUG)
+    sys.stderr = LoggerWriter(logger, logging.WARNING)
     return logger, starttime
 
 class Led():
@@ -197,8 +198,8 @@ class Scheduler():
 
   def run(self):
     asyncio.set_event_loop(self.loop)
-    sys.stdout = LoggerWriter(self.logger.debug)
-    sys.stderr = LoggerWriter(self.logger.warning)
+    sys.stdout = LoggerWriter(self.logger, logging.DEBUG)
+    sys.stderr = LoggerWriter(self.logger, logging.WARNING)
     self.logger.debug('launch scheduler')
     morningtime = os.environ.get('MORNING')
     if morningtime is None:
