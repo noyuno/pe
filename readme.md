@@ -31,8 +31,9 @@
 sudo apt-mark hold raspberrypi-kernel raspberrypi-bootloader
 sudo apt update
 sudo apt -y upgrade
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc bluez ruby
 pip3 install --user rpi.gpio schedule
+gem install bluebutton
 git clone https://github.com/noyuno/room
 ~~~
 
@@ -69,7 +70,7 @@ mpg321 pastel-house.mp3
 bash play_radiko.sh
 ~~~
 
-## 10. 赤外線で各種機器の操作テスト
+## 10. 赤外線で各種機器の操作テスト・登録
 
 ~~~
 mkdir ir
@@ -96,6 +97,13 @@ python3 convert.py ac-off
 sudo systemctl restart lircd
 irsend SEND_ONCE iris-toggle button
 irsend SEND_ONCE ac-heating button
+~~~
+
+## Bluetooth
+
+~~~
+sudo cp bluetooth.conf /etc/dbus-1/system.d/bluetooth.conf
+sudo systemctl restart dbus
 ~~~
 
 ## 9. Pythonスクリプト
