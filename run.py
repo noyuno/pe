@@ -21,8 +21,11 @@ class LoggerWriter():
     self.level = level
     self.logger = logger
   def write(self, buf):
-    for line in buf.rstrip().splitlines():
-      self.logger.log(self.level, line.rstrip())
+    try:
+      for line in buf.rstrip().splitlines():
+        self.logger.log(self.level, line.rstrip())
+    except:
+      pass
   def flush(self):
     self.logger.log(self.level, sys.stderr)
   def fileno(self):
