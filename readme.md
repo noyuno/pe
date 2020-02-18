@@ -31,7 +31,7 @@
 sudo apt-mark hold raspberrypi-kernel raspberrypi-bootloader
 sudo apt update
 sudo apt -y upgrade
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc bluez ruby
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc bluez ruby evtest
 pip3 install --user rpi.gpio schedule
 gem install bluebutton
 git clone https://github.com/noyuno/room
@@ -103,8 +103,21 @@ irsend SEND_ONCE ac-heating button
 
 ~~~
 sudo cp bluetooth.conf /etc/dbus-1/system.d/bluetooth.conf
-sudo systemctl restart dbus
+sudo reboot
 ~~~
+
+~~~
+bluetoothctl
+> scan on
+[NEW] Device FF:FF:C1:21:C6:9D AB Shutter3
+> connect FF:FF:C1:21:C6:9D
+> pair FF:FF:C1:21:C6:9D
+> trust FF:FF:C1:21:C6:9D
+> quit
+
+~~~
+
+
 
 ## 9. Pythonスクリプト
 
