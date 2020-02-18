@@ -15,6 +15,7 @@ import logging
 import schedule
 import asyncio
 import linecache
+import retry
 
 class LoggerWriter():
   def __init__(self, logger, level):
@@ -113,6 +114,7 @@ class Radio():
     self.rtmpdump = None
     self.mplayer = None
 
+  @retry.retry(tries=50, delay=10)
   def auth(self):
     # auth
     self.player = requests.get('http://radiko.jp/apps/js/flash/myplayer-release.swf')
@@ -157,6 +159,7 @@ class Radio():
       self.channels.append(i.attrib['id'])
     self.logger.debug('self.channels={}'.format(self.channels))
 
+  @retry.retry(tries=50, delay=10)
   def changechannel(self, channel):
     r = requests.get('http://radiko.jp/v2/station/stream/{}.xml'.format(channel))
     streamurl = et.fromstring(r.content).find('./item').text
@@ -275,6 +278,7 @@ class Main():
     self.radio.close()
 
   def run(self):
+
     self.radio.auth()
     self.radio.nextchannel()
     stoptimer = None
@@ -329,11 +333,13 @@ class Main():
     # Ctrl+Cが押されたらGPIOを解放
     except KeyboardInterrupt:
       self.close()
+      sys.exit(1)
     except Exception as e:
       exc_type, exc_obj, tb = sys.exc_info()
       lineno = tb.tb_lineno
       self.logger.error("Unexpected error: line {}: {}: {}".format(lineno, str(type(e)), e))
       self.close()
+      sys.exit(1)
 
 if __name__ == "__main__":
   logger, starttime = initlogger()

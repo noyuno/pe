@@ -32,7 +32,7 @@ sudo apt-mark hold raspberrypi-kernel raspberrypi-bootloader
 sudo apt update
 sudo apt -y upgrade
 sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc bluez ruby evtest
-pip3 install --user rpi.gpio schedule
+pip3 install --user rpi.gpio schedule retry
 gem install bluebutton
 git clone https://github.com/noyuno/room
 ~~~
@@ -58,9 +58,10 @@ rm .tmux.conf
 最後にスピーカの上にラズパイをアクリル粘着テープで固定する。
 
 
-## 7. スピーカテスト
+## 7. スピーカ設定
 
 ~~~
+sudo cp asound.conf /etc
 mpg321 pastel-house.mp3
 ~~~
 
