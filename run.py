@@ -101,7 +101,7 @@ class Led():
   #   return int(1==GPIO.input(23))
 
   def sw1(self):
-    state == int(0==GPIO.input(5))
+    state = int(0==GPIO.input(5))
     if self.sw1press != 0 and state == 0:
       self.sw1press = 0
       if self.sw1press - time.time() < 1:
@@ -113,7 +113,7 @@ class Led():
       return 0
 
   def sw2(self):
-    state == int(0==GPIO.input(6))
+    state = int(0==GPIO.input(6))
     if self.sw2press != 0 and state == 0:
       self.sw2press = 0
       if self.sw2press - time.time() < 1:
@@ -193,10 +193,8 @@ class Radio():
     streamurl = et.fromstring(r.content).find('./item').text
     u = urllib.parse.urlparse(streamurl)
 
-    if self.mplayer != None and self.mplayer.poll() == None:
-      self.mplayer.kill()
-    if self.rtmpdump != None and self.rtmpdump.poll() == None:
-      self.rtmpdump.kill()
+    self.mplayer.kill()
+    self.rtmpdump.kill()
     
     rtmpdumpcommand = [
       'rtmpdump',
@@ -230,10 +228,8 @@ class Radio():
     self.stop()
 
   def stop(self):
-    if self.mplayer != None and self.mplayer.poll() == None:
-      self.mplayer.kill()
-    if self.rtmpdump != None and self.rtmpdump.poll() == None:
-      self.rtmpdump.kill()
+    self.mplayer.kill()
+    self.rtmpdump.kill()
 
 class Scheduler():
   def __init__(self, logger, loop, main):
