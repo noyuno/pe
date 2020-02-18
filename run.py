@@ -73,28 +73,56 @@ class Led():
     GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     # LED1, 2, 3, 4ピン出力設定
-    GPIO.setup(17, GPIO.OUT)
-    GPIO.setup(18, GPIO.OUT)
-    GPIO.setup(22, GPIO.OUT)
-    GPIO.setup(27, GPIO.OUT)
+    self.ledpin = [27, 22, 18, 17]
+    for i in range(4):
+      GPIO.setup(i, GPIO.OUT)
     
     # human sensor
     # GPIO.setup(23, GPIO.IN)
 
-  def on(self, mode, radio):
-    GPIO.output(17, int(mode))
-    GPIO.output(18, int(int(radio / 4) % 2))
-    GPIO.output(22, int(int(radio / 2) % 2))
-    GPIO.output(27, int(int(radio / 1) % 2))
+    self.sw1press = 0
+    self.sw2press = 0
+
+  def all(self, mode):
+    for b in range(3):
+      GPIO.output(self.ledpin[b], not(not(mode & 1 << b)))
+    
+  def blink(self, mode, mask, span, count):
+    for i in range(count * 2):
+      for b in range(3):
+        if mask & 1 << b:
+          if mode & 1 << b:
+            GPIO.output(self.ledpin[b], (i + 1) % 2)
+          else:
+            GPIO.output(self.ledpin[b], 0)
+      time.sleep(span)
 
   # def human(self):
   #   return int(1==GPIO.input(23))
 
   def sw1(self):
-    return int(0==GPIO.input(5))
+    state == int(0==GPIO.input(5))
+    if self.sw1press != 0 and state == 0:
+      self.sw1press = 0
+      if self.sw1press - time.time() < 1:
+        return 1
+      else:
+        return 2
+    else:
+      self.sw1flag = state
+      return 0
 
   def sw2(self):
-    return int(0==GPIO.input(6))
+    state == int(0==GPIO.input(6))
+    if self.sw2press != 0 and state == 0:
+      self.sw2press = 0
+      if self.sw2press - time.time() < 1:
+        return 1
+      else:
+        return 2
+    else:
+      self.sw2flag = state
+      return 0
 
   def close(self):
       GPIO.cleanup(5)
@@ -271,6 +299,7 @@ class Main():
     self.logger.debug('morning mode')
     self.subrun(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
     self.subrun(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
+    self.radio.nextchannel()
     self.nightmode = 0
 
   def close(self):
@@ -288,46 +317,34 @@ class Main():
       while True:
         counter += 1
 
-        # 子プロセスの死活監視(1secごと)
-        if counter % 20 == 0:
+        # 子プロセスの死活監視(5secごと)
+        if counter % 100 == 0:
           counter = 0
-          if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
-            (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
-            self.logger.warning('radio process dead. restarting...')
-            self.radio.stop()
-            self.radio.nextchannel()
+          if self.mode != 0:
+            if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
+              (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
+              self.logger.warning('radio process dead. restarting...')
+              self.radio.stop()
+              self.radio.nextchannel()
     
         # SW2 blackが押された場合
-        if self.led.sw2():
+        sw2 = self.led.sw2()
+        if sw2 == 1:
+          # short
           self.radio.nextchannel()
-
-        # timer -> stop
-        # if 0==self.led.human():
-        #   # 部屋の中に人がいない
-        #   if self.mode == 1 and (stoptimer == None or stoptimer.is_alive() == False):
-        #     self.logger.debug('starting stoptimer')
-        #     stoptimer = threading.Timer(60, self.stop)
-        #     stoptimer.start()
-        # elif self.nightmode == 0:
-        #   # 部屋の中に人がいる
-        #   if stoptimer != None and stoptimer.is_alive() == True:
-        #     self.logger.debug('canceling stoptimer')
-        #     stoptimer.cancel()
-        #   if self.mode == 0:
-        #     self.start()
-
-        # human sensor -> led
-        # hmode = int(not(self.led.human()))
-        # SW1 red
-        # if hmode == 0:
-          # hmode = self.led.sw1()
-        hmode = self.led.sw1()
+        elif sw2 == 2:
+          # long
+          self.led.blink(0b0111, 0b0111, 0.5, 1)
+          self.radio.current = 0
+          self.radio.changechannel(self.radio.channels[0])
+          
+        hmode = (self.led.sw1() == 1)
 
         # send ir
         if self.led.sw1():
           pass
 
-        self.led.on(hmode, self.radio.current)
+        self.led.all(hmode << 3 | self.radio.current)
         time.sleep(0.05)
 
     # Ctrl+Cが押されたらGPIOを解放
