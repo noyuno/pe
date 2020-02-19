@@ -104,27 +104,25 @@ class Led():
   #   return int(1==GPIO.input(23))
 
   def sw1(self):
-    state = int(0==GPIO.input(5))
-    if self.sw1press != 0 and state == 0:
+    if self.sw1press != 0 and int(0==GPIO.input(5)) == 0:
       self.sw1press = 0
       if time.time() - self.sw1press < 1:
         return 1
       else:
         return 2
     else:
-      self.sw1press = state
+      self.sw1press = time.time()
       return 0
 
   def sw2(self):
-    state = int(0==GPIO.input(6))
-    if self.sw2press != 0 and state == 0:
+    if self.sw2press != 0 and int(0==GPIO.input(6)) == 0:
       self.sw2press = 0
       if time.time() - self.sw2press < 1:
         return 1
       else:
         return 2
     else:
-      self.sw2press = state
+      self.sw2press = time.time()
       return 0
 
   def close(self):
