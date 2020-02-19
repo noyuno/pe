@@ -335,7 +335,7 @@ class Main():
     self.schedulerthread.start()
     
     self.radio.auth()
-    self.radio.nextchannel()
+    self.radio.changechannel(self.radio.channels[0])
     stoptimer = None
 
     counter = 0
