@@ -273,7 +273,7 @@ class Main():
     self.radio = Radio(self.logger)
     self.led = Led(logger)
     self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
-    threading.Thread(target=self.scheduler.run, name='scheduler').start()
+    self.schedulerthread = threading.Thread(target=self.scheduler.run, name='scheduler', daemon=True)
     self.mode = 1
     self.nightmode = 0
 
@@ -316,7 +316,8 @@ class Main():
     self.radio.close()
 
   def run(self):
-
+    self.schedulerthread.start()
+    
     self.radio.auth()
     self.radio.nextchannel()
     stoptimer = None
