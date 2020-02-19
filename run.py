@@ -113,10 +113,11 @@ class Led():
         self.sw1press = 0
         return ret
       else:
-        self.sw1press = time.time()
         return 0
     else:
       #press
+      if self.sw1press == 0:
+        self.sw1press = time.time()
       return 0
 
   def sw2(self):
@@ -129,10 +130,11 @@ class Led():
         self.sw2press = 0
         return ret
       else:
-        self.sw2press = time.time()
         return 0
     else:
       #press
+      if self.sw2press == 0:
+        self.sw2press = time.time()
       return 0
       
   def close(self):
