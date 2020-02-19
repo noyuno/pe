@@ -352,6 +352,7 @@ class Main():
         sw2 = self.led.sw2()
         if sw2 == 1:
           # short
+          self.logger.debug('pressed sw2(short), change next channel')
           self.radio.nextchannel()
         elif sw2 == 2:
           # long
