@@ -182,6 +182,8 @@ class Radio():
     areaid = auth2.content.decode('utf-8').replace('\r\n', '').split(',')[0]
     self.logger.debug('areaid={}, self.authtoken={}'.format(areaid, self.authtoken))
     # get channel list
+    self.channels = ['']
+    self.current = 0
     chan = requests.get('http://radiko.jp/v2/api/program/today?area_id={}'.format(areaid))
     for i in et.fromstring(chan.content).findall('./stations/station[@id]'):
       self.channels.append(i.attrib['id'])
@@ -189,12 +191,21 @@ class Radio():
 
   @retry.retry(tries=50, delay=10)
   def changechannel(self, channel):
+    if channel == '':
+      if self.mplayer != None and self.mplayer.poll() == None:
+        self.mplayer.kill()
+      if self.rtmpdump != None and self.rtmpdump.poll() == None:
+        self.rtmpdump.kill()
+      return
+      
     r = requests.get('http://radiko.jp/v2/station/stream/{}.xml'.format(channel))
     streamurl = et.fromstring(r.content).find('./item').text
     u = urllib.parse.urlparse(streamurl)
 
-    self.mplayer.kill()
-    self.rtmpdump.kill()
+    if self.mplayer != None and self.mplayer.poll() == None:
+      self.mplayer.kill()
+    if self.rtmpdump != None and self.rtmpdump.poll() == None:
+      self.rtmpdump.kill()
     
     rtmpdumpcommand = [
       'rtmpdump',
@@ -213,7 +224,7 @@ class Radio():
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
-      stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
+      stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggercWriter(self.logger, logging.WARNING), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
@@ -228,8 +239,10 @@ class Radio():
     self.stop()
 
   def stop(self):
-    self.mplayer.kill()
-    self.rtmpdump.kill()
+    if self.mplayer != None and self.mplayer.poll() == None:
+      self.mplayer.kill()
+    if self.rtmpdump != None and self.rtmpdump.poll() == None:
+      self.rtmpdump.kill()
 
 class Scheduler():
   def __init__(self, logger, loop, main):
