@@ -75,7 +75,7 @@ class Led():
     # LED1, 2, 3, 4ピン出力設定
     self.ledpin = [27, 22, 18, 17]
     for i in range(4):
-      GPIO.setup(i, GPIO.OUT)
+      GPIO.setup(self.ledpin[i], GPIO.OUT)
     
     # human sensor
     # GPIO.setup(23, GPIO.IN)
@@ -197,7 +197,7 @@ class Radio():
       if self.rtmpdump != None and self.rtmpdump.poll() == None:
         self.rtmpdump.kill()
       return
-      
+
     r = requests.get('http://radiko.jp/v2/station/stream/{}.xml'.format(channel))
     streamurl = et.fromstring(r.content).find('./item').text
     u = urllib.parse.urlparse(streamurl)
