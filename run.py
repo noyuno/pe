@@ -246,6 +246,9 @@ class Radio():
         self.current = 0
       else:
         self.current += 1
+    else:
+      if self.current == 0:
+        self.current += 1
     self.changechannel(self.channels[self.current])
 
   def close(self):
