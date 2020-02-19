@@ -1,21 +1,24 @@
 # requirements: swfextract (swftools), rtmpdump, mplayer, irsend(lirc)
 
-import os
-import sys
-import time
-from datetime import datetime
-import RPi.GPIO as GPIO
-import requests
-import base64
-import xml.etree.ElementTree as et
-import subprocess
-import urllib.parse
-import threading
-import logging
-import schedule
 import asyncio
+import base64
 import linecache
+import logging
+import os
+import signal
+import subprocess
+import sys
+import threading
+import time
+import urllib.parse
+import xml.etree.ElementTree as et
+from datetime import datetime
+
+import requests
 import retry
+import RPi.GPIO as GPIO
+import schedule
+
 
 class LoggerWriter():
   def __init__(self, logger, level):
@@ -368,8 +371,17 @@ class Main():
       self.close()
       sys.exit(1)
 
+main = None
+
+def termed(signum, frame):
+    print("shutting down...")
+    if main != None:
+      main.close()
+    sys.exit(0)
+
 if __name__ == "__main__":
   logger, starttime = initlogger()
   logger.info('started room at {0}'.format(starttime))
+  signal.signal(signal.SIGTERM, termed)
   main = Main(logger)
   main.run()
