@@ -71,7 +71,14 @@ sudo systemctl start pigpiod
 sudo systemctl status pigpiod
 sudo systemctl enable pigpiod
 echo 'm 13 w   w 13 0   m 4 r   pud 4 u' > /dev/pigpio
+python3 irrp.py -r -g4 -f codes iris:off --no-confirm --post 100
+python3 irrp.py -p -g13 -f codes iris:off
 python3 irrp.py -r -g4 -f codes iris:toggle --no-confirm --post 100
+python3 irrp.py -p -g13 -f codes iris:toggle
+python3 irrp.py -r -g4 -f codes ac:off --no-confirm --post 100
+python3 irrp.py -p -g13 -f codes ac:off
+python3 irrp.py -r -g4 -f codes ac:heating --no-confirm --post 100
+python3 irrp.py -p -g13 -f codes ac:heating
 ~~~
 
 ## Bluetooth

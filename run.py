@@ -141,6 +141,11 @@ class Device():
   def lux(self):
     return '{:.1f}'.format(tsl2572.lux)
 
+  def sendir(self, name):
+    command = ['python3', 'irrp.py', '-p', '-g13', '-f', 'codes', name]
+    self.logger.info('executing command: {}'.format(' '.join(command)))
+    subprocess.run(command, stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING))
+
   def close(self):
     pass
 
@@ -306,22 +311,23 @@ class Main():
   def stop(self):
     self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
-    self.subrun(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
-    self.subrun(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
+    self.device.sendir('iris:off')
+    self.device.sendir('ac:off')
     self.mode = 0
 
   def night(self):
     self.logger.debug('night mode')
     self.radio.stop()
-    self.subrun(['irsend', 'SEND_ONCE', 'iris-off', 'button'])
-    self.subrun(['irsend', 'SEND_ONCE', 'ac-off', 'button'])
+    self.device.sendir('iris:off')
+    self.device.sendir('ac:off')
     self.mode = 0
     self.nightmode = 1
   
   def morning(self):
     self.logger.debug('morning mode')
-    self.subrun(['irsend', 'SEND_ONCE', 'iris-toggle', 'button'])
-    self.subrun(['irsend', 'SEND_ONCE', 'ac-heating', 'button'])
+    if self.device.lux() < 500:
+      self.device.sendir('iris:toggle')
+    self.device.sendir('ac:heating')
     self.radio.nextchannel()
     self.nightmode = 0
 
