@@ -346,7 +346,7 @@ class Main():
         # 子プロセスの死活監視(5secごと)
         if counter % 100 == 0:
           counter = 0
-          if self.mode != 0:
+          if self.mode != 0 and self.radio.current != 0:
             if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
               (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
               self.logger.warning('radio process dead. restarting...')
