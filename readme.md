@@ -22,6 +22,7 @@
 - `4. Localization Option/I1 Change Keyboard Layout`
 - `4. Localization Option/I1 Change Wi-fi Country`
 - `5. Interfacing Options/P2 SSH`
+- `5. Interfacing Options/P5 I2C`
 - `7. Advanced Options/A1 Expand Filesystem...`
 - `7. Advanced Options/A4 Audio`: `1 Force 3.5,, jack`
 
@@ -30,7 +31,7 @@
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev pigpio python3-pigpio bluez ruby evtest
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev pigpio python3-pigpio bluez ruby evtest python3-smbus
 pip3 install --user schedule retry
 sudo gem install bluebutton
 git clone https://github.com/noyuno/room
@@ -119,10 +120,4 @@ sudo systemctl enable room
 
 ## トラブルシューティング
 
-### しばらくするとラジオにノイズ対策
-
-sudo nano /etc/rc.local
-
-~~~
-iwconfig wlan0 power off
-~~~
+### AB Shutterのボタンを押してもevtestで検出できない

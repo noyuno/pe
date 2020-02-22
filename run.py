@@ -21,6 +21,29 @@ import schedule
 import tsl2572
 
 
+class Scheduler():
+  def __init__(self, logger, loop, main):
+    self.logger = logger
+    self.loop = loop
+    self.main = main
+
+  def run(self):
+    asyncio.set_event_loop(self.loop)
+    sys.stdout = LoggerWriter(self.logger, logging.DEBUG)
+    sys.stderr = LoggerWriter(self.logger, logging.WARNING)
+    self.logger.debug('launch scheduler')
+    morningtime = os.environ.get('MORNING')
+    if morningtime is None:
+      morningtime = '06:20'
+    nighttime = os.environ.get('NIGHT')
+    if nighttime is None:
+      nighttime = '00:30'
+    schedule.every().day.at(morningtime).do(self.main.morning)
+    schedule.every().day.at(nighttime).do(self.main.night)
+    while True:
+      schedule.run_pending()
+      time.sleep(1)
+
 class LoggerWriter():
   def __init__(self, logger, level):
     self.level = level
@@ -69,6 +92,8 @@ def initlogger():
 
 class Device():
   def __init__(self, logger):
+    self.logger = logger
+
     # GPIOの準備
     self.io = pigpio.pi()
 
@@ -86,6 +111,7 @@ class Device():
 
     self.sw1press = 0
     self.sw2press = 0
+
 
   def all(self, mode):
     for b in range(3):
@@ -139,7 +165,12 @@ class Device():
       return 0
       
   def lux(self):
-    return '{:.1f}'.format(tsl2572.lux)
+    tsl2572 = TSL2572(0x39)
+    if tsl2572.id_read():
+      tsl2572.meas_single()
+      return self.lux
+    else:
+      raise Exception('TSL2572 failed to read id')
 
   def sendir(self, name):
     command = ['python3', 'irrp.py', '-p', '-g13', '-f', 'codes', name]
@@ -263,29 +294,6 @@ class Radio():
     if self.rtmpdump != None and self.rtmpdump.poll() == None:
       self.rtmpdump.kill()
 
-class Scheduler():
-  def __init__(self, logger, loop, main):
-    self.logger = logger
-    self.loop = loop
-    self.main = main
-
-  def run(self):
-    asyncio.set_event_loop(self.loop)
-    sys.stdout = LoggerWriter(self.logger, logging.DEBUG)
-    sys.stderr = LoggerWriter(self.logger, logging.WARNING)
-    self.logger.debug('launch scheduler')
-    morningtime = os.environ.get('MORNING')
-    if morningtime is None:
-      morningtime = '06:20'
-    nighttime = os.environ.get('NIGHT')
-    if nighttime is None:
-      nighttime = '00:30'
-    schedule.every().day.at(morningtime).do(self.main.morning)
-    schedule.every().day.at(nighttime).do(self.main.night)
-    while True:
-      schedule.run_pending()
-      time.sleep(1)
-
 class Main():
   def __init__(self, logger):
     self.logger = logger
@@ -325,7 +333,8 @@ class Main():
   
   def morning(self):
     self.logger.debug('morning mode')
-    if self.device.lux() < 500:
+    self.radio.nextchannel()
+    if self.device.lux() < 40:
       self.device.sendir('iris:toggle')
     self.device.sendir('ac:heating')
     self.radio.nextchannel()
