@@ -237,7 +237,7 @@ class Radio():
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
-      stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggercWriter(self.logger, logging.WARNING), shell=False)
+      stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
