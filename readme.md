@@ -2,19 +2,19 @@
 
 ## 1. 要件
 
-1. Raspberry Pi zero
+1. Raspberry Pi 4
 2. ダイソー スピーカ(300円)（改造）
 5. RPZ-IR-Sensor(4450円)
 6. 人感センサ
-
-※RPI4はlinux 4.14不可(赤外線は4.14のみ確認)
 
 ## 2. 仕様
 
 1. インターネットラジオが聞ける
 4. 人がいるときにオン・いないときにオフ
 
-## 3. raspi-config
+## 3. 設定
+
+### raspi-config
 
 - `2. Network Options/N1 Hostname`
 - `2. Network Options/Wi-fi`
@@ -28,12 +28,11 @@
 ## 4. 必要なソフトのインストール
 
 ~~~
-sudo apt-mark hold raspberrypi-kernel raspberrypi-bootloader
 sudo apt update
 sudo apt -y upgrade
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev wiringpi lirc bluez ruby evtest
-pip3 install --user rpi.gpio schedule retry
-gem install bluebutton
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev pigpio python3-pigpio bluez ruby evtest
+pip3 install --user schedule retry
+sudo gem install bluebutton
 git clone https://github.com/noyuno/room
 ~~~
 
@@ -45,12 +44,6 @@ git clone https://github.com/noyuno/dotfiles
 ./dotfiles/bin/dfdeploy
 ~~~
 
-RPiZeroでdotfilesの設定は重すぎてスクリプトが落ちるほどなので、適用しないこと。
-
-~~~
-rm .tmux.conf
-
-~~~
 
 ## 6. 改造（任意）
 
@@ -68,36 +61,17 @@ mpg321 pastel-house.mp3
 ## 8. Radikoテスト
 
 ~~~
-bash play_radiko.sh
+bash play_radiko.sh NACK5
 ~~~
 
 ## 10. 赤外線で各種機器の操作テスト・登録
 
 ~~~
-mkdir ir
-sudo systemctl stop lircd
-sudo rm -rf /etc/lirc
-sudo ln -sfnv $HOME/room/lirc /etc/lirc
-
-mode2 -d /dev/lirc0 > ir/iris-toggle
-(C-C)
-python3 convert.py iris-toggle
-
-mode2 -d /dev/lirc0 > ir/ac-heating
-(C-C)
-python3 convert.py ac-heating
-
-mode2 -d /dev/lirc0 > ir/iris-off
-(C-C)
-python3 convert.py iris-off
-
-mode2 -d /dev/lirc0 > ir/ac-off
-(C-C)
-python3 convert.py ac-off
-
-sudo systemctl restart lircd
-irsend SEND_ONCE iris-toggle button
-irsend SEND_ONCE ac-heating button
+sudo systemctl start pigpiod
+sudo systemctl status pigpiod
+sudo systemctl enable pigpiod
+echo 'm 13 w   w 13 0   m 4 r   pud 4 u' > /dev/pigpio
+python3 irrp.py -r -g4 -f codes iris:toggle --no-confirm --post 100
 ~~~
 
 ## Bluetooth
@@ -137,3 +111,11 @@ sudo systemctl enable room
 ~~~
 
 ## トラブルシューティング
+
+### しばらくするとラジオにノイズ対策
+
+sudo nano /etc/rc.local
+
+~~~
+iwconfig wlan0 power off
+~~~

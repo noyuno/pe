@@ -13,11 +13,12 @@ import time
 import urllib.parse
 import xml.etree.ElementTree as et
 from datetime import datetime
+import pigpio
 
 import requests
 import retry
-import RPi.GPIO as GPIO
 import schedule
+import tsl2572
 
 
 class LoggerWriter():
@@ -66,19 +67,19 @@ def initlogger():
     sys.stderr = LoggerWriter(logger, logging.WARNING)
     return logger, starttime
 
-class Led():
+class Device():
   def __init__(self, logger):
     # GPIOの準備
-    GPIO.setmode(GPIO.BCM)
+    self.io = pigpio.pi()
 
     # SW1, SW2ピン入力設定
-    GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    self.io.set_mode(5, pigpio.INPUT)
+    self.io.set_mode(6, pigpio.INPUT)
 
     # LED1, 2, 3, 4ピン出力設定
     self.ledpin = [27, 22, 18, 17]
     for i in range(4):
-      GPIO.setup(self.ledpin[i], GPIO.OUT)
+      self.io.set_mode(self.ledpin[i], pigpio.OUTPUT)
     
     # human sensor
     # GPIO.setup(23, GPIO.IN)
@@ -88,23 +89,23 @@ class Led():
 
   def all(self, mode):
     for b in range(3):
-      GPIO.output(self.ledpin[b], not(not(mode & 1 << b)))
+      self.io.write(self.ledpin[b], not(not(mode & 1 << b)))
     
   def blink(self, mode, mask, span, count):
     for i in range(count * 2):
       for b in range(3):
         if mask & 1 << b:
           if mode & 1 << b:
-            GPIO.output(self.ledpin[b], (i + 1) % 2)
+            self.io.write(self.ledpin[b], (i + 1) % 2)
           else:
-            GPIO.output(self.ledpin[b], 0)
+            self.io.write(self.ledpin[b], 0)
       time.sleep(span)
 
   # def human(self):
   #   return int(1==GPIO.input(23))
 
   def sw1(self):
-    if GPIO.input(5):
+    if self.io.read(5):
       #release
       if self.sw1press != 0:
         ret = 1
@@ -121,7 +122,7 @@ class Led():
       return 0
 
   def sw2(self):
-    if GPIO.input(6):
+    if self.io.read(6):
       #release
       if self.sw2press != 0:
         ret = 1
@@ -137,14 +138,11 @@ class Led():
         self.sw2press = time.time()
       return 0
       
+  def lux(self):
+    return '{:.1f}'.format(tsl2572.lux)
+
   def close(self):
-      GPIO.cleanup(5)
-      GPIO.cleanup(6)
-      GPIO.cleanup(17)
-      GPIO.cleanup(18)
-      GPIO.cleanup(22)
-      GPIO.cleanup(27)
-      # GPIO.cleanup(23)
+    pass
 
 class Radio():
   def __init__(self, logger):
@@ -287,7 +285,7 @@ class Main():
   def __init__(self, logger):
     self.logger = logger
     self.radio = Radio(self.logger)
-    self.led = Led(logger)
+    self.device = Device(logger)
     self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
     self.schedulerthread = threading.Thread(target=self.scheduler.run, name='scheduler', daemon=True)
     self.mode = 1
@@ -328,7 +326,7 @@ class Main():
     self.nightmode = 0
 
   def close(self):
-    self.led.close()
+    self.device.close()
     self.radio.close()
 
   def run(self):
@@ -354,24 +352,24 @@ class Main():
               self.radio.nextchannel()
     
         # SW2 blackが押された場合
-        sw2 = self.led.sw2()
+        sw2 = self.device.sw2()
         if sw2 == 1:
           # short
           self.logger.debug('pressed sw2(short), change next channel')
           self.radio.nextchannel()
         elif sw2 == 2:
           # long
-          self.led.blink(0b0111, 0b0111, 0.5, 1)
+          self.device.blink(0b0111, 0b0111, 0.5, 1)
           self.radio.current = 0
           self.radio.changechannel(self.radio.channels[0])
           
-        hmode = (self.led.sw1() == 1)
+        hmode = (self.device.sw1() == 1)
 
         # send ir
-        if self.led.sw1():
+        if self.device.sw1():
           pass
 
-        self.led.all(hmode << 3 | self.radio.current)
+        self.device.all(hmode << 3 | self.radio.current)
         time.sleep(0.05)
 
     # Ctrl+Cが押されたらGPIOを解放
