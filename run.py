@@ -19,6 +19,7 @@ import requests
 import retry
 import schedule
 import tsl2572
+import bme280i2c
 
 
 class Scheduler():
