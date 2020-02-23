@@ -96,7 +96,7 @@ class Radio():
       rtmpdumpcommand.append('-q')
     self.logger.debug(' '.join(rtmpdumpcommand))
     self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, stderr=clog.LoggerWriter(self.logger, logging.WARNING), shell=False)
-    mplayercommand = ['mplayer', '-channels', '2', '-af', 'pan=1:1', '-']
+    mplayercommand = ['mplayer', '-nolirc', '-ao', 'alsa', '-channels', '2', '-af', 'pan=1:1', '-']
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
