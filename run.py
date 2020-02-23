@@ -13,6 +13,7 @@ import urllib.parse
 import xml.etree.ElementTree as et
 from datetime import datetime
 import traceback
+import queue
 
 import requests
 
@@ -63,6 +64,7 @@ class Main():
     self.press = 0
     self.humid = 0
     self.etemp = 0
+    self.queue = queue.Queue()
 
   def subrun(self, command):
     self.logger.info('executing command: {}'.format(' '.join(command)))
@@ -129,9 +131,31 @@ class Main():
   def acoff(self):
     self.device.sendir('ac:off')
 
+  def radiooff(self):
+    self.device.blink(0b0111, 0b0111, 0.5, 1)
+    self.radio.current = 0
+    self.radio.changechannel(self.radio.channels[0])
+
   def close(self):
     self.device.close()
     self.radio.close()
+
+  def parsequeue(self):
+    if self.queue.empty() == False:
+      q = self.queue.get()
+      c = q.get('command')
+      if c == 'ac-on':
+        self.acon()
+      elif c == 'ac-off':
+        self.acoff()
+      elif c == 'iris-on':
+        self.irison()
+      elif c == 'iris-off':
+        self.irisoff()
+      elif c == 'radio-next':
+        self.radio.nextchannel()
+      elif c == 'radio-stop':
+        self.radiooff()
 
   def run(self):
     self.schedulerthread.start()
@@ -155,7 +179,7 @@ class Main():
           self.lux = self.device.lux()
           (self.temp, self.press, self.humid) = self.device.tph()
           self.etemp = calcet(self.temp, self.humid)
-          self.logger.debug(f't={self.temp} h={self.humid} et={self.etemp} m={self.mode}')
+          #self.logger.debug(f't={self.temp} h={self.humid} et={self.etemp} m={self.mode}')
           if self.mode != 0:
             # 動作中
             if self.radio.current != 0:
@@ -194,10 +218,8 @@ class Main():
           self.radio.nextchannel()
         elif sw2 == 2:
           # long
-          self.device.blink(0b0111, 0b0111, 0.5, 1)
-          self.radio.current = 0
-          self.radio.changechannel(self.radio.channels[0])
-          
+          self.radiooff()
+
         hmode = (self.device.sw1() == 1)
 
         # 暗かったらOFF

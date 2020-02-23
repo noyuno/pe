@@ -1,0 +1,16 @@
+version: "3"
+services:
+    notifyd:
+        build: .
+        restart: always
+        ports:
+            - "5050:5050"
+        volumes:
+            - ./data/notifyd:/data/notifyd
+            - ./logs/notifyd:/logs/notifyd
+        environment:
+            DEPLOY: /data/notifyd
+            DISCORD_TOKEN: ${DISCORD_TOKEN}
+            NOTIFYD_TOKEN: "abc"
+            DISCORD_CHANNEL_NAME: p3
+            PORT: 5050

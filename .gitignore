@@ -6,3 +6,4 @@ ir/*
 !.gitkeep
 __pycache__
 *.pyc
+.env

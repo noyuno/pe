@@ -10,7 +10,9 @@
 ## 2. 仕様
 
 1. インターネットラジオが聞ける
-4. 人がいるときにオン・いないときにオフ
+2. 照明やエアコンなどの赤外線で操作できる機器を気温などに応じで自動制御
+3. Discordで遠隔制御
+
 
 ## 3. 設定
 
@@ -31,7 +33,7 @@
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev pigpio python3-pigpio bluez ruby evtest python3-smbus
+sudo apt install -y libusb-dev git mpg321 rtmpdump swftools mplayer libxml2-utils python3-pip libi2c-dev pigpio python3-pigpio bluez ruby evtest python3-smbus docker-compose docker
 pip3 install --user schedule retry
 sudo gem install bluebutton
 git clone https://github.com/noyuno/room
@@ -83,7 +85,7 @@ python3 irrp.py -r -g4 -f ir/data ac:heating --no-confirm --post 100
 python3 irrp.py -p -g13 -f ir/data ac:heating
 ~~~
 
-## Bluetooth
+## Bluetooth（うごかない）
 
 ~~~
 sudo cp bluetooth.conf /etc/dbus-1/system.d/bluetooth.conf
@@ -117,6 +119,14 @@ sudo cp room.service /etc/systemd/system/
 sudo systemctl start room
 sudo systemctl status room
 sudo systemctl enable room
+~~~
+
+## Discordで家電をリモート操作
+
+.envにDISCORD_TOKENを入力
+
+~~~
+docker-compose up
 ~~~
 
 ## トラブルシューティング
