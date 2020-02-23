@@ -2,7 +2,6 @@
 
 import asyncio
 import base64
-import linecache
 import logging
 import os
 import signal
@@ -13,6 +12,7 @@ import time
 import urllib.parse
 import xml.etree.ElementTree as et
 from datetime import datetime
+import traceback
 
 import requests
 
@@ -172,9 +172,8 @@ class Main():
       self.close()
       sys.exit(1)
     except Exception as e:
-      exc_type, exc_obj, tb = sys.exc_info()
-      lineno = tb.tb_lineno
-      self.logger.error(f"Unexpected error: line {lineno}: {str(type(e))}: {e}")
+      self.logger.error(f"Unexpected error: {e.__name__}: {e}")
+      self.logger.error(traceback.format_exc())
       self.close()
       sys.exit(1)
 

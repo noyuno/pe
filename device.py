@@ -29,6 +29,7 @@ class Device():
     self.sw1press = 0
     self.sw2press = 0
 
+    self.tsl = tsl2572.TSL2572(0x39)
     self.bmech1 = bme280i2c.BME280I2C(0x76)
     self.bmech2 = bme280i2c.BME280I2C(0x77)
 
@@ -84,17 +85,16 @@ class Device():
       return 0
       
   def lux(self):
-    tsl2572 = tsl2572.TSL2572(0x39)
-    if tsl2572.id_read():
-      tsl2572.meas_single()
-      return self.lux
+    if self.tsl.id_read():
+      self.tsl.meas_single()
+      return self.tsl.lux
     else:
       raise Exception('TSL2572 failed to read id')
 
   def tph(self):
-    if self.bmech1.meas():
+    if self.bmech1.meas(): # 外付け
       return (self.bmech1.T, self.bmech1.P, self.bmech1.H)
-    elif self.bmech2.meas():
+    elif self.bmech2.meas(): # 内蔵
       return (self.bmech2.T, self.bmech2.P, self.bmech2.H)
     else:
       raise Exception('BME280 failed to read')
