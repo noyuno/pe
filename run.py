@@ -168,12 +168,12 @@ class Main():
               self.mode = 0
               self.radio.stop()
               self.device.sendir('ac:off')
-            elif self.etemp < 18 and self.aconauto == 0:
+            elif self.etemp < 19 and self.aconauto == 0:
               self.logger.debug(f'the room is cold, turn on ac (etemp={self.etemp})')
               self.acon()
               # 1h待機
               aconauto = 1 * 60 * 60 / 5
-            elif self.etemp > 30 and self.aconauto == 0:
+            elif self.etemp > 29 and self.aconauto == 0:
               self.logger.debug(f'the room is hot, turn on ac (etemp={self.etemp})')
               self.acon()
               aconauto = 1 * 60 * 60 / 5
@@ -182,7 +182,7 @@ class Main():
             if self.lux > 20:
               self.logger.debug(f'the room is bright, turn on radio, ac(lux={self.lux})')
               self.mode = 1
-              self.ac()
+              self.acon()
               self.radio.nextchannel()
     
         # SW2 blackが押された場合
