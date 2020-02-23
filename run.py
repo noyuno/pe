@@ -141,6 +141,7 @@ class Main():
     stoptimer = None
 
     counter = 0
+    aconauto = 0
     try:
       while True:
         counter += 1
