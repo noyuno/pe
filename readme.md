@@ -126,6 +126,8 @@ sudo systemctl enable room
 .envにDISCORD_TOKENを入力
 
 ~~~
+sudo gpasswd -a pi docker
+(exit ssh)
 docker-compose up
 ~~~
 
