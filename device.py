@@ -100,7 +100,7 @@ class Device():
       raise Exception('BME280 failed to read')
 
   def sendir(self, name):
-    command = ['python3', 'irrp.py', '-p', '-g13', '-f', 'codes', name]
+    command = ['python3', 'irrp.py', '-p', '-g13', '-f', 'ir/data', name]
     self.logger.info('executing command: {}'.format(' '.join(command)))
     subprocess.run(command, stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING))
 
