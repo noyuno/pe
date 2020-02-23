@@ -59,6 +59,10 @@ class Main():
     self.schedulerthread = threading.Thread(target=self.scheduler.run, name='scheduler', daemon=True)
     self.mode = 1
     self.nightmode = 0
+    self.temp = 0
+    self.press = 0
+    self.humid = 0
+    self.etemp = 0
 
   def subrun(self, command):
     self.logger.info('executing command: {}'.format(' '.join(command)))
@@ -75,48 +79,55 @@ class Main():
   def stop(self):
     self.logger.debug('There seem to be no people, stopping radio')
     self.radio.stop()
-    self.device.sendir('iris:off')
-    self.device.sendir('ac:off')
+    self.irisoff()
+    self.acoff()
     self.mode = 0
 
   def odekake(self):
     self.logger.debug('odekake(=night) mode')
     self.radio.stop()
-    self.device.sendir('iris:off')
-    self.device.sendir('ac:off')
+    self.irisoff()
+    self.acoff()
     self.mode = 0
     self.nightmode = 1
 
   def night(self):
     self.logger.debug('night mode')
     self.radio.stop()
-    self.device.sendir('iris:off')
-    self.device.sendir('ac:off')
+    self.irisoff()
+    self.acoff()
     self.mode = 0
     self.nightmode = 1
-  
+
   def morning(self):
     self.logger.debug('morning mode')
-    if self.lux < 40:
-      self.device.sendir('iris:toggle')
-    self.ac(self.temp, self.humid)
+    self.irison()
+    self.acon()
     self.radio.nextchannel()
     self.nightmode = 0
     self.mode = 1
 
+  def irison(self):
+    if self.lux < 10:
+      self.device.sendir('iris:toggle')
 
+  def irisoff(self):
+    if self.lux > 20:
+      self.device.sendir('iris:off')
 
-  def ac(self):
-    et = calcet(self.temp, self.humid)
-    if et < 22:
+  def acon(self):
+    if self.etemp < 20:
       name = 'ac:heating'
-    elif et > 28:
+    elif self.etemp > 28:
       name = 'ac:cooling'
     else:
-      self.logger.debug(f'no need ac (et={et})')
+      self.logger.debug(f'no need ac (etemp={self.etemp})')
       return
-    self.logger.debug(f'turn on ac, name={name} (et={et})')
+    self.logger.debug(f'turn on ac, name={name} (etemp={self.etemp})')
     self.device.sendir(name)
+
+  def acoff(self):
+    self.device.sendir('ac:off')
 
   def close(self):
     self.device.close()
@@ -134,12 +145,17 @@ class Main():
       while True:
         counter += 1
 
-        # 子プロセスの死活監視, 暗くなったらOFF(5secごと)
+        # 子プロセスの死活監視, 空調自動調節等(5secごと)
         if counter % 100 == 0:
           counter = 0
+          if aconauto > 0:
+            aconauto -= 0
+
           self.lux = self.device.lux()
           (self.temp, self.press, self.humid) = self.device.tph()
+          self.etemp = calcet(self.temp, self.humid)
           if self.mode != 0:
+            # 動作中
             if self.radio.current != 0:
               if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
                 (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
@@ -151,7 +167,17 @@ class Main():
               self.mode = 0
               self.radio.stop()
               self.device.sendir('ac:off')
+            elif self.etemp < 18 and self.aconauto == 0:
+              self.logger.debug(f'the room is cold, turn on ac (etemp={self.etemp})')
+              self.acon()
+              # 1h待機
+              aconauto = 1 * 60 * 60 / 5
+            elif self.etemp > 30 and self.aconauto == 0:
+              self.logger.debug(f'the room is hot, turn on ac (etemp={self.etemp})')
+              self.acon()
+              aconauto = 1 * 60 * 60 / 5
           else:
+            # 休止中
             if self.lux > 20:
               self.logger.debug(f'the room is bright, turn on radio, ac(lux={self.lux})')
               self.mode = 1
