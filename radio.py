@@ -7,7 +7,7 @@ import xml.etree.ElementTree as et
 
 import retry
 import requests
-
+import clog
 
 class Radio():
   def __init__(self, logger):
@@ -38,8 +38,8 @@ class Radio():
     self.authtoken = auth1.headers['x-radiko-authtoken']
     offset = auth1.headers['x-radiko-keyoffset']
     length = auth1.headers['x-radiko-keylength']
-    swf = subprocess.check_output(['swfextract', '-b', '12', '/dev/stdin', '-o', '/dev/stdout'], input=self.player.content, stderr=LoggerWriter(self.logger, logging.WARNING))
-    dd = subprocess.check_output(['dd', 'bs=1', 'skip=' + offset, 'count=' + length], input=swf, stderr=LoggerWriter(self.logger, logging.WARNING))
+    swf = subprocess.check_output(['swfextract', '-b', '12', '/dev/stdin', '-o', '/dev/stdout'], input=self.player.content, stderr=clog.LoggerWriter(self.logger, logging.WARNING))
+    dd = subprocess.check_output(['dd', 'bs=1', 'skip=' + offset, 'count=' + length], input=swf, stderr=clog.LoggerWriter(self.logger, logging.WARNING))
     partialkey = base64.b64encode(dd)
     auth2 = requests.post('https://radiko.jp/v2/api/auth2_fms',
       headers={
@@ -95,12 +95,12 @@ class Radio():
     if not os.environ.get('DEBUG'):
       rtmpdumpcommand.append('-q')
     self.logger.debug(' '.join(rtmpdumpcommand))
-    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
+    self.rtmpdump = subprocess.Popen(rtmpdumpcommand, stdout=subprocess.PIPE, stderr=clog.LoggerWriter(self.logger, logging.WARNING), shell=False)
     mplayercommand = ['mplayer', '-channels', '2', '-af', 'pan=1:1', '-']
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
-      stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING), shell=False)
+      stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \

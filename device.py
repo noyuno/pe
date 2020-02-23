@@ -5,6 +5,8 @@ import tsl2572
 import logging
 import subprocess
 
+import clog
+
 class Device():
   def __init__(self, logger):
     self.logger = logger
@@ -100,7 +102,7 @@ class Device():
   def sendir(self, name):
     command = ['python3', 'irrp.py', '-p', '-g13', '-f', 'codes', name]
     self.logger.info('executing command: {}'.format(' '.join(command)))
-    subprocess.run(command, stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING))
+    subprocess.run(command, stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING))
 
   def close(self):
     pass

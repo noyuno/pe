@@ -19,7 +19,7 @@ import requests
 import device
 import radio
 import schedule
-
+import clog
 
 class Scheduler():
   def __init__(self, logger, loop, main):
@@ -29,8 +29,8 @@ class Scheduler():
 
   def run(self):
     asyncio.set_event_loop(self.loop)
-    sys.stdout = LoggerWriter(self.logger, logging.DEBUG)
-    sys.stderr = LoggerWriter(self.logger, logging.WARNING)
+    sys.stdout = clog.LoggerWriter(self.logger, logging.DEBUG)
+    sys.stderr = clog.LoggerWriter(self.logger, logging.WARNING)
     self.logger.debug('launch scheduler')
     morningtime = os.environ.get('MORNING', default='06:20')
     odekaketime = os.environ.get('ODEKAKE', default='07:40')
@@ -41,54 +41,6 @@ class Scheduler():
     while True:
       schedule.run_pending()
       time.sleep(1)
-
-class LoggerWriter():
-  def __init__(self, logger, level):
-    self.level = level
-    self.logger = logger
-  def write(self, buf):
-    for line in buf.rstrip().splitlines():
-      self.logger.log(self.level, line.rstrip())
-  def flush(self):
-    self.logger.log(self.level, sys.stderr)
-  def fileno(self):
-    # emulate fileno
-    if self.level == logging.DEBUG:
-      return 1
-    elif self.level == logging.INFO:
-      return 1
-    elif self.level == logging.WARNING:
-      return 2
-    elif self.level == logging.ERROR:
-      return 2
-    elif self.level == logging.CRITICAL:
-      return 2
-    else:
-      return 2
-
-def initlogger():
-    logdir = './logs'
-    os.makedirs(logdir, exist_ok=True)
-    starttime = datetime.now().strftime('%Y%m%d-%H%M')
-    logging.getLogger().setLevel(logging.WARNING)
-    logger = logging.getLogger('room')
-    if os.environ.get('DEBUG'):
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-    logFormatter = logging.Formatter(fmt='%(asctime)s %(levelname)s: %(message)s',
-                                     datefmt='%Y%m%d-%H%M')
-    fileHandler = logging.FileHandler(f'{logdir}/{starttime}')
-    fileHandler.setFormatter(logFormatter)
-    logger.addHandler(fileHandler)
-    consoleHandler = logging.StreamHandler()
-    consoleHandler.setFormatter(logFormatter)
-    logger.addHandler(consoleHandler)
-    sys.stdout = LoggerWriter(logger, logging.DEBUG)
-    sys.stderr = LoggerWriter(logger, logging.WARNING)
-    return logger, starttime
-
-
 
 class Main():
   def __init__(self, logger):
@@ -102,7 +54,7 @@ class Main():
 
   def subrun(self, command):
     self.logger.info('executing command: {}'.format(' '.join(command)))
-    return subprocess.run(command, stdout=LoggerWriter(self.logger, logging.DEBUG), stderr=LoggerWriter(self.logger, logging.WARNING))
+    return subprocess.run(command, stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING))
 
   def start(self):
     self.logger.debug('There seem to be people... nothing to do')
@@ -235,7 +187,7 @@ def termed(signum, frame):
     sys.exit(0)
 
 if __name__ == "__main__":
-  logger, starttime = initlogger()
+  logger, starttime = clog.initlogger()
   logger.info(f'started room at {starttime}')
   signal.signal(signal.SIGTERM, termed)
   main = Main(logger)
