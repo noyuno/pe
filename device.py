@@ -93,9 +93,9 @@ class Device():
 
   def tph(self):
     if self.bmech1.meas(): # 外付け
-      return (self.bmech1.T, self.bmech1.P, self.bmech1.H / 100)
+      return (self.bmech1.T, self.bmech1.P, self.bmech1.H / 100.0)
     elif self.bmech2.meas(): # 内蔵
-      return (self.bmech2.T, self.bmech2.P, self.bmech2.H / 100)
+      return (self.bmech2.T, self.bmech2.P, self.bmech2.H / 100.0)
     else:
       raise Exception('BME280 failed to read')
 
