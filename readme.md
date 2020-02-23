@@ -56,6 +56,7 @@ git clone https://github.com/noyuno/dotfiles
 
 ~~~
 sudo cp asound.conf /etc
+amixer sset PCM 100%
 mpg321 pastel-house.mp3
 ~~~
 
