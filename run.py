@@ -135,6 +135,8 @@ class Main():
         # 子プロセスの死活監視, 暗くなったらOFF(5secごと)
         if counter % 100 == 0:
           counter = 0
+          self.lux = self.device.lux()
+          (self.temp, self.press, self.humid) = self.device.tph()
           if self.mode != 0:
             if self.radio.current != 0:
               if (self.radio.mplayer != None and self.radio.mplayer.poll() != None) or \
@@ -142,8 +144,6 @@ class Main():
                 self.logger.warning('radio process dead. restarting...')
                 self.radio.stop()
                 self.radio.nextchannel()
-            self.lux = self.device.lux()
-            (self.temp, self.press, self.humid) = self.device.tph()
             if self.lux < 10:
               self.logger.debug(f'the room is gloomy, turn off radio, ac (lux={self.lux})')
               self.mode = 0
