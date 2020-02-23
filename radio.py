@@ -65,7 +65,7 @@ class Radio():
       self.channels.append(i.attrib['id'])
     self.logger.debug(f'self.channels={self.channels}')
 
-  #@retry.retry(tries=50, delay=10)
+  @retry.retry(tries=50, delay=10)
   def changechannel(self, channel):
     if channel == '':
       if self.mplayer != None and self.mplayer.poll() == None:
@@ -129,4 +129,3 @@ class Radio():
 
   def resume(self):
     self.changechannel(self.channels[self.current])
-    
