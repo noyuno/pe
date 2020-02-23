@@ -55,7 +55,7 @@ class Main():
   def __init__(self, logger):
     self.logger = logger
     self.radio = radio.Radio(self.logger)
-    self.device = device.Device(logger)
+    self.device = device.Device(self.logger, self.radio)
     self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
     self.schedulerthread = threading.Thread(target=self.scheduler.run, name='scheduler', daemon=True)
     self.mode = 1
@@ -133,8 +133,7 @@ class Main():
 
   def radiooff(self):
     self.device.blink(0b0111, 0b0111, 0.5, 1)
-    self.radio.current = 0
-    self.radio.changechannel(self.radio.channels[0])
+    self.radio.stop()
 
   def close(self):
     self.device.close()

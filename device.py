@@ -8,8 +8,9 @@ import subprocess
 import clog
 
 class Device():
-  def __init__(self, logger):
+  def __init__(self, logger, radio):
     self.logger = logger
+    self.radio = radio
 
     # GPIOの準備
     self.io = pigpio.pi()
@@ -100,9 +101,11 @@ class Device():
       raise Exception('BME280 failed to read')
 
   def sendir(self, name):
+    self.radio.pause()
     command = ['python3', 'irrp.py', '-p', '-g13', '-f', 'ir/data', name]
     self.logger.info('executing command: {}'.format(' '.join(command)))
     subprocess.run(command, stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING))
+    self.radio.resume()
 
   def close(self):
     pass

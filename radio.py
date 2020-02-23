@@ -118,8 +118,15 @@ class Radio():
     self.stop()
 
   def stop(self):
+    self.pause()
+    self.current = 0
+
+  def pause(self):
     if self.mplayer != None and self.mplayer.poll() == None:
       self.mplayer.kill()
     if self.rtmpdump != None and self.rtmpdump.poll() == None:
       self.rtmpdump.kill()
-    self.current = 0
+
+  def resume(self):
+    self.changechannel(self.channels[self.current])
+    
