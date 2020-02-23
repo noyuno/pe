@@ -21,6 +21,14 @@ import radio
 import schedule
 import clog
 
+def calcet(t, h):
+  # expecting value
+  # h: 0.00 - 1.00
+  # t: -10 - 40
+  a = 1.76
+  tm = 37 - ((37 - t) / ((0.68 - 0.14 * h) + (1 / a))) - 0.29 * t * (1 - h)
+  return tm
+
 class Scheduler():
   def __init__(self, logger, loop, main):
     self.logger = logger
@@ -96,16 +104,10 @@ class Main():
     self.nightmode = 0
     self.mode = 1
 
-  def calcet(self, t, h):
-    # expecting value
-    # h: 0.00 - 1.00
-    # t: -10 - 40
-    a = 1.76
-    tm = 37 - ((37 - t) / ((0.68 - 0.14 * h) + (1 / a))) - 0.29 * t * (1 - h)
-    return tm
 
-  def ac(self, t, h):
-    et = self.calcet(t, h)
+
+  def ac(self):
+    et = calcet(self.temp, self.humid)
     if et < 22:
       name = 'ac:heating'
     elif et > 28:
@@ -153,8 +155,8 @@ class Main():
             if self.lux > 20:
               self.logger.debug(f'the room is bright, turn on radio, ac(lux={self.lux})')
               self.mode = 1
-              self.radio.nextchannel()
               self.ac()
+              self.radio.nextchannel()
     
         # SW2 blackが押された場合
         sw2 = self.device.sw2()
