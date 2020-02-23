@@ -18,7 +18,6 @@ import requests
 
 import device
 import radio
-import retry
 import schedule
 
 
@@ -136,11 +135,11 @@ class Main():
     self.mode = 0
     self.nightmode = 1
   
-  def morning(self, lux):
+  def morning(self, lux, t, h):
     self.logger.debug('morning mode')
     if lux < 40:
       self.device.sendir('iris:toggle')
-    self.device.sendir('ac:heating')
+    self.ac(t, h)
     self.radio.nextchannel()
     self.nightmode = 0
     self.mode = 1
@@ -155,11 +154,15 @@ class Main():
 
   def ac(self, t, h):
     et = self.calcet(t, h)
-    if et < 25:
+    if et < 22:
       name = 'ac:heating'
-    else:
+    elif et > 28:
       name = 'ac:cooling'
-    self.logger.debug(f'turn on ac, name={name}')
+    else:
+      self.logger.debug(f'no need ac (et={et})')
+      return
+    self.logger.debug(f'turn on ac, name={name} (et={et})')
+    self.device.sendir(name)
 
   def close(self):
     self.device.close()
