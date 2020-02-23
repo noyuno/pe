@@ -87,11 +87,11 @@ class Main():
     self.mode = 0
     self.nightmode = 1
   
-  def morning(self, lux, t, h):
+  def morning(self):
     self.logger.debug('morning mode')
-    if lux < 40:
+    if self.lux < 40:
       self.device.sendir('iris:toggle')
-    self.ac(t, h)
+    self.ac(self.temp, self.humid)
     self.radio.nextchannel()
     self.nightmode = 0
     self.mode = 1
@@ -142,9 +142,12 @@ class Main():
                 self.logger.warning('radio process dead. restarting...')
                 self.radio.stop()
                 self.radio.nextchannel()
-            if self.device.lux() < 40:
+            self.lux = self.device.lux()
+            (self.temp, self.press, self.humid) = self.device.tph()
+            if self.lux < 30:
+              self.logger.debug('the room seems gloomy, turn off radio, ac')
+              self.mode = 0
               self.radio.stop()
-              self.device.sendir('iris:off')
               self.device.sendir('ac:off')
     
         # SW2 blackが押された場合
