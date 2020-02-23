@@ -123,11 +123,15 @@ sudo systemctl enable room
 
 ## Discordで家電をリモート操作
 
-.envにDISCORD_TOKENを入力
 
 ~~~
 sudo gpasswd -a pi docker
 (exit ssh)
+cd
+git clone https://github.com/noyuno/notifyd
+cd notifyd
+cp ../room/docker-compose.yml .
+(.envにDISCORD_TOKENを入力)
 docker-compose up
 ~~~
 
