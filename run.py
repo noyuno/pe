@@ -169,12 +169,12 @@ class Main():
               self.mode = 0
               self.radio.stop()
               self.device.sendir('ac:off')
-            elif self.etemp < 20 and self.aconauto == 0:
+            elif self.etemp < 19 and aconauto == 0:
               self.logger.debug(f'the room is cold, turn on ac (etemp={self.etemp})')
               self.acon()
               # 1h待機
               aconauto = 1 * 60 * 60 / 5
-            elif self.etemp > 28 and self.aconauto == 0:
+            elif self.etemp > 28 and aconauto == 0:
               self.logger.debug(f'the room is hot, turn on ac (etemp={self.etemp})')
               self.acon()
               aconauto = 1 * 60 * 60 / 5
