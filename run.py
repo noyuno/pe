@@ -155,6 +155,7 @@ class Main():
           self.lux = self.device.lux()
           (self.temp, self.press, self.humid) = self.device.tph()
           self.etemp = calcet(self.temp, self.humid)
+          self.logger.debug(f't={self.temp} h={self.humid} et={self.etemp} m={self.mode}')
           if self.mode != 0:
             # 動作中
             if self.radio.current != 0:
@@ -163,7 +164,7 @@ class Main():
                 self.logger.warning('radio process dead. restarting...')
                 self.radio.stop()
                 self.radio.nextchannel()
-            if self.lux < 10:
+            if self.lux < 5:
               self.logger.debug(f'the room is gloomy, turn off radio, ac (lux={self.lux})')
               self.mode = 0
               self.radio.stop()
