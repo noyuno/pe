@@ -150,7 +150,7 @@ class Main():
         if counter % 100 == 0:
           counter = 0
           if aconauto > 0:
-            aconauto -= 0
+            aconauto -= 1
 
           self.lux = self.device.lux()
           (self.temp, self.press, self.humid) = self.device.tph()
