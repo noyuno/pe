@@ -144,8 +144,8 @@ class Main():
                 self.radio.nextchannel()
             self.lux = self.device.lux()
             (self.temp, self.press, self.humid) = self.device.tph()
-            if self.lux < 30:
-              self.logger.debug(f'the room seems gloomy, turn off radio, ac (lux={self.lux}')
+            if self.lux < 20:
+              self.logger.debug(f'the room seems gloomy, turn off radio, ac (lux={self.lux})')
               self.mode = 0
               self.radio.stop()
               self.device.sendir('ac:off')
