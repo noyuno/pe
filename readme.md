@@ -68,7 +68,7 @@ mpg321 pastel-house.mp3
 bash play_radiko.sh NACK5
 ~~~
 
-## 10. 赤外線で各種機器の操作テスト・登録
+## 9. 赤外線で各種機器の操作テスト・登録
 
 ~~~
 sudo systemctl start pigpiod
@@ -85,7 +85,7 @@ python3 irrp.py -r -g4 -f ir/data ac:heating --no-confirm --post 100
 python3 irrp.py -p -g13 -f ir/data ac:heating
 ~~~
 
-## Bluetooth（うごかない）
+## 10. Bluetooth（うごかない）
 
 ~~~
 sudo cp bluetooth.conf /etc/dbus-1/system.d/bluetooth.conf
@@ -105,14 +105,14 @@ bluetoothctl
 
 
 
-## 9. Pythonスクリプト
+## 11. Pythonスクリプト
 
 ~~~
 python3 run.py
 DEBUG=1 python3 run.py
 ~~~
 
-## Pythonスクリプトをデーモン化
+## 12. Pythonスクリプトをデーモン化
 
 ~~~
 sudo cp room.service /etc/systemd/system/
@@ -121,7 +121,7 @@ sudo systemctl status room
 sudo systemctl enable room
 ~~~
 
-## Discordで家電をリモート操作
+## 13. Discordで家電をリモート操作
 
 
 ~~~
@@ -135,6 +135,6 @@ cp ../room/docker-compose.yml .
 docker-compose up
 ~~~
 
-## トラブルシューティング
+## 2. トラブルシューティング
 
-### AB Shutterのボタンを押してもevtestで検出できない
+### 1. AB Shutterのボタンを押してもevtestで検出できない

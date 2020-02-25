@@ -186,7 +186,7 @@ class Main():
                 (self.radio.rtmpdump != None and self.radio.rtmpdump.poll() != None):
                 self.logger.warning('radio process dead. restarting...')
                 self.radio.stop()
-                self.radio.nextchannel()
+                self.radio.changechannel(self.radio.channels[self.radio.current])
             if self.lux < 5:
               self.logger.debug(f'the room is gloomy, turn off radio, ac (lux={self.lux})')
               self.mode = 0

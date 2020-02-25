@@ -99,6 +99,8 @@ class Radio():
     mplayercommand = ['mplayer', '-nolirc', '-ao', 'alsa', '-channels', '2', '-af', 'pan=1:1', '-']
     if not os.environ.get('DEBUG'):
       mplayercommand.append('-quiet')
+    if self.rtmpdump != None and self.rtmpdump.poll() != None:
+      raise Exception('cannot launch rtmpdump')
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
       stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING), shell=False)
     
