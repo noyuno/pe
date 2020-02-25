@@ -111,7 +111,7 @@ class Radio():
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
       stdout=clog.LoggerWriter(self.logger, logging.DEBUG),
       stderr=clog.LoggerWriter(self.logger, logging.WARNING,
-        patterns=['Audio device got stuck'], callback=self.reboot()), shell=False)
+        patterns=['Audio device got stuck'], callback=self.reboot, shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \
