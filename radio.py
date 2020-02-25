@@ -9,6 +9,7 @@ import retry
 import requests
 import clog
 
+
 class Radio():
   def __init__(self, logger):
     self.logger = logger
@@ -17,6 +18,12 @@ class Radio():
     self.player = None
     self.rtmpdump = None
     self.mplayer = None
+
+
+  def reboot(self, pattern, text):
+    command = ['sudo', '/sbin/shutdown', '-r', '0']
+    self.logger.critical('DETECTED AUDIO STACK! REBOOTING')
+    subprocess.run(command)
 
   @retry.retry(tries=50, delay=10)
   def auth(self):
@@ -102,7 +109,9 @@ class Radio():
     if self.rtmpdump != None and self.rtmpdump.poll() != None:
       raise Exception('cannot launch rtmpdump')
     self.mplayer = subprocess.Popen(mplayercommand, stdin=self.rtmpdump.stdout,
-      stdout=clog.LoggerWriter(self.logger, logging.DEBUG), stderr=clog.LoggerWriter(self.logger, logging.WARNING), shell=False)
+      stdout=clog.LoggerWriter(self.logger, logging.DEBUG),
+      stderr=clog.LoggerWriter(self.logger, logging.WARNING,
+        patterns=['Audio device got stuck'], callback=self.reboot()), shell=False)
     
   def nextchannel(self):
     if self.mplayer != None and self.mplayer.poll() == None and \

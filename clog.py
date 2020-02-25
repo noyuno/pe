@@ -4,12 +4,25 @@ from datetime import datetime
 import sys
 
 class LoggerWriter():
-  def __init__(self, logger, level):
+  def __init__(self, logger, level, patterns=[], callback=None):
     self.level = level
     self.logger = logger
+    self.patterns = patterns
+    self.callback = callback
+    
   def write(self, buf):
     for line in buf.rstrip().splitlines():
-      self.logger.log(self.level, line.rstrip())
+      t = line.rstrip()
+      self.logger.log(self.level, t)
+      
+      matched = None
+      for pattern in self.patterns:
+        if pattern in t:
+          matched = pattern
+          break
+      if matched:
+        callback(matched, t)
+
   def flush(self):
     self.logger.log(self.level, sys.stderr)
   def fileno(self):

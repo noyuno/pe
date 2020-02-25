@@ -28,6 +28,15 @@
 - `7. Advanced Options/A1 Expand Filesystem...`
 - `7. Advanced Options/A4 Audio`: `1 Force 3.5,, jack`
 
+## 権限
+
+~~~
+sudo visudo
+~~~
+~~~
+pi ALL=NOPASSWD: /sbin/shutdown
+~~~
+
 ## 4. 必要なソフトのインストール
 
 ~~~
