@@ -1,3 +1,6 @@
+# notifyd settings example
+# cp docker-compose.yml ../notifyd
+
 version: "3"
 services:
     notifyd:

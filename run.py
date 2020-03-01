@@ -21,6 +21,7 @@ import device
 import radio
 import schedule
 import clog
+import api
 
 def calcet(t, h):
   # expecting value
@@ -41,7 +42,7 @@ class Scheduler():
     sys.stdout = clog.LoggerWriter(self.logger, logging.DEBUG)
     sys.stderr = clog.LoggerWriter(self.logger, logging.WARNING)
     self.logger.debug('launch scheduler')
-    morningtime = os.environ.get('MORNING', default='06:20')
+    morningtime = os.environ.get('MORNING', default='06:30')
     odekaketime = os.environ.get('ODEKAKE', default='07:40')
     nighttime = os.environ.get('NIGHT', default='00:30')
     schedule.every().day.at(morningtime).do(self.main.morning)
@@ -54,17 +55,19 @@ class Scheduler():
 class Main():
   def __init__(self, logger):
     self.logger = logger
+    self.queue = queue.Queue()
     self.radio = radio.Radio(self.logger)
     self.device = device.Device(self.logger, self.radio)
     self.scheduler = Scheduler(self.logger, asyncio.new_event_loop(), self)
     self.schedulerthread = threading.Thread(target=self.scheduler.run, name='scheduler', daemon=True)
+    self.api = api.API(asyncio.new_event_loop(), self.queue, self.logger, os.environ.get('TOKEN'))
+    self.apithread = threading.Thread(target=self.api.run, name='api', daemon=True)
     self.mode = 1
     self.nightmode = 0
     self.temp = 0
     self.press = 0
     self.humid = 0
     self.etemp = 0
-    self.queue = queue.Queue()
 
   def subrun(self, command):
     self.logger.info('executing command: {}'.format(' '.join(command)))
@@ -158,6 +161,7 @@ class Main():
 
   def run(self):
     self.schedulerthread.start()
+    self.apithread.start()
     
     self.radio.auth()
     self.radio.changechannel(self.radio.channels[0])
@@ -248,6 +252,9 @@ def termed(signum, frame):
 if __name__ == "__main__":
   logger, starttime = clog.initlogger()
   logger.info(f'started room at {starttime}')
+  if os.environ.get('TOKEN') is None or os.environ.get('PORT') is None:
+    logger.error('environment variable TOKEN / PORT has not set')
+    sys.exit(1)
   signal.signal(signal.SIGTERM, termed)
   main = Main(logger)
   main.run()

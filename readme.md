@@ -147,3 +147,20 @@ docker-compose up
 ## 2. トラブルシューティング
 
 ### 1. AB Shutterのボタンを押してもevtestで検出できない
+
+不明
+
+### 2. 赤外線送信ができない
+
+~~~
+sudo systemctl restart pigpiod
+~~~
+
+### 3. 勝手にroom_notifyd_1 コンテナが起動する
+
+このシステムはnotifyd_notifyd_1が必要だが、room_notifyd_1は起動する必要はないので設定変更する。
+
+~~~
+docker inspect -f "{{.Name}} {{.HostConfig.RestartPolicy.Name}}" $(docker ps -aq) | grep always
+docker update --restart=no room_notifyd_1
+~~~
