@@ -164,3 +164,11 @@ sudo systemctl restart pigpiod
 docker inspect -f "{{.Name}} {{.HostConfig.RestartPolicy.Name}}" $(docker ps -aq) | grep always
 docker update --restart=no room_notifyd_1
 ~~~
+
+### 4. エアコンの電源をつけるとき、ラズパイから赤外線を送信するときと付属リモコンのボタンを押すときの設定温度が違う
+
+仕様。ラズパイに再登録する。
+
+~~~
+python3 irrp.py -r -g4 -f ir/data ac:heating --no-confirm --post 100
+~~~
